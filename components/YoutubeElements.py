@@ -16,7 +16,7 @@ def throughChannelId(youtube) -> str:
     '''
     channel_id = st.text_input('Enter Channel ID', value='UCEXnhgo3qEjrlkDvljtf5xg')
     if channel_id:
-        st.markdown(f"https://www.youtube.com/channel/{channel_id}")
+        st.caption(f"https://www.youtube.com/channel/{channel_id}")
 
         return channel_id
 
@@ -43,7 +43,6 @@ def throughChannelName(youtube):
         st.write("")
         channelbutton = st.button('Get Channel ID')
     if channelbutton:
-
         # Get channel ID
         channel_id = get_channel_id(youtube, channel_name)
         st.write("Channel ID:")
@@ -87,9 +86,8 @@ def choosePlaylist(playlists : list) -> str:
         cleaned_playlists[playlist['Title']] = playlist['ID']
 
     # Choosing the playlist
-    st.subheader("Playlists:")
     play = st.selectbox('Select Playlist',list(cleaned_playlists.keys()))
-    st.markdown(f"https://www.youtube.com/playlist?list={cleaned_playlists[play]}")
+    st.caption(f"https://www.youtube.com/playlist?list={cleaned_playlists[play]}")
 
     return cleaned_playlists[play]
 

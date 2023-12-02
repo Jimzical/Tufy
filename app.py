@@ -22,12 +22,12 @@ def main():
     # Get all playlists for that channel
     playlists = get_all_playlists(youtube, channel_id)
 
-    # Choose a playlist
     chosen_playlist = choosePlaylist(playlists)
-    st.divider()
 
     # Display playlist information
-    displayPlaylistItems(youtube,chosen_playlist)
+    toggle_display = st.toggle('Display Playlist Items')
+    if toggle_display:
+        displayPlaylistItems(youtube,chosen_playlist)
 
 
 
