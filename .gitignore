@@ -5,3 +5,5 @@ components/__pycache__/
 .cache
 tester.py
 components/__pycache__/YoutubeElements.cpython-310.pyc
+components/YoutubeHelper.py
+data

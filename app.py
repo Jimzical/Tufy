@@ -1,12 +1,11 @@
 '''
-Version: 0.2.0
+Version: 0.3.0
 Date: 03-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
 
 Current Issues:
-    - choosePlaylsit changed to multiselect from selectbox so gotta fix the docs and currently have a temp fix to use only the first one
-
+    - 
 
 Updates:
     - Cleaned up Code
@@ -24,13 +23,12 @@ from components.YoutubeHelper import *
 from components.YoutubeElements import *
 from components.SpotifyHelper import *
 
-
 def main(): 
     st.title('Youtube Channel Information')
     # Create a YouTube API object
     youtube = InitializeYoutube()
     sp = InitializeSpotify()
-
+    spc = InitializeSpotifyClient()
     tab1,tab2 = st.tabs(["Channel Id","Channel Name"])
     try:
         with tab1:
@@ -54,30 +52,39 @@ def main():
         st.error("No Playlists Found")
         return
 
-    chosen_playlist = choosePlaylist(playlists)
+    chosen_playlist_options = choosePlaylist(playlists, chooseAll=True)
 
-    # TEMP FIX ----> Using only the first playlist
-    chosen_playlist = chosen_playlist[0]
+    cleaned_playlists = {}
+    for playlist in playlists:
+        cleaned_playlists[playlist['ID']] = playlist['Title']
 
-    # Display playlist information
     toggle_youtube_display = st.toggle('Display Playlist Items')
     if toggle_youtube_display:
-        displayPlaylistItems(youtube,chosen_playlist)
+        total_songs = 0
+        for chosen_playlist in chosen_playlist_options:
 
+            playlist_songs = returnPlaylistItems(youtube,chosen_playlist)
+            st.subheader(f"Playlist: {cleaned_playlists[chosen_playlist]}")
+            st.write(playlist_songs)
+            st.write(len(playlist_songs))
+            total_songs += len(playlist_songs)
+
+        st.subheader(total_songs)
     toggle_spotify_display = st.toggle("Display Spotify Results")
     if toggle_spotify_display:
-        playlist_songs = returnPlaylistItems(youtube,chosen_playlist)
-        for song in playlist_songs:
-            with st.expander(f"{song}",expanded=True):
-                track_list = searchTrack(sp, song)
-                st.write(track_list)
+        track_details = {}
+        for chosen_playlist in chosen_playlist_options:
+            st.subheader(f"Playlist: {cleaned_playlists[chosen_playlist]}")
+            track_details[chosen_playlist] = {}
+            playlist_songs = returnPlaylistItems(youtube,chosen_playlist)
+            for song in playlist_songs:
+                track_list = searchTrack(spc, song)
+                track_details[chosen_playlist][track_list["track_name"]] = track_list["track_id"]
+                st.write(track_list["track_name"])
                 st.markdown(f"https://open.spotify.com/track/{track_list['track_id']}")
-                
 
-    # track_name = st.text_input('Enter track name')
-    # if track_name:
-    #     track_list = searchTrack(sp, track_name)
-    #     st.write(track_list)
+            st.toast(f"Completed Playlist: {cleaned_playlists[chosen_playlist]}")
+        st.toast("Completed All")
 
 
 if __name__ == '__main__':

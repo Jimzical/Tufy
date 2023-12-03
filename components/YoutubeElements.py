@@ -88,22 +88,26 @@ def chooseChannel(youtube) -> str:
 
     return channel_id
 
-def choosePlaylist(playlists : list) -> str:
+def choosePlaylist(playlists : list, chooseAll = False, testMode = False, markdown = False) -> str:
     # Display playlists	
     cleaned_playlists = {}
     for playlist in playlists:
         cleaned_playlists[playlist['Title']] = playlist['ID']
 
     # Choosing the playlist
+    if chooseAll:
+        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=list(cleaned_playlists.keys()))
+    elif testMode:
+        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=["Loop"])
+    else:
+        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=list(cleaned_playlists.keys())[0])
 
-    # TODO: Remove this, this is just for testing
-    play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=["Loop"])
 
-    # play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=list(cleaned_playlists.keys())[0])
     
     cleaned_playlists_list = []
     for i in play:
-        st.caption(f"https://www.youtube.com/playlist?list={cleaned_playlists[i]}")
+        if markdown:
+            st.caption(f"https://www.youtube.com/playlist?list={cleaned_playlists[i]}")
         cleaned_playlists_list.append(cleaned_playlists[i])
 
     return cleaned_playlists_list
@@ -119,14 +123,3 @@ def displayPlaylistItems(youtube,chosen_playlist : str) -> None:
             col1,col2,col3 = st.columns([4,2,2])
             col1.image(i['snippet']['thumbnails']['default']['url'])
             col2.subheader(f"{i['snippet']['title']}  -  {i['snippet']['videoOwnerChannelTitle']}")
-
-def returnPlaylistItems(youtube,chosen_playlist : str) -> list():
-    # Showing the songs in the playlist
-    response = playlistInfo(youtube,chosen_playlist)
-    res = response['items']
-
-    playlist_items = []
-    for i in res:
-        playlist_items.append(f"{i['snippet']['title']} by {i['snippet']['videoOwnerChannelTitle']}")
-
-    return playlist_items
