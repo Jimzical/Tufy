@@ -85,11 +85,16 @@ def choosePlaylist(playlists : list) -> str:
     for playlist in playlists:
         cleaned_playlists[playlist['Title']] = playlist['ID']
 
+    # st.write(cleaned_playlists.keys())
     # Choosing the playlist
-    play = st.selectbox('Select Playlist',list(cleaned_playlists.keys()))
-    st.caption(f"https://www.youtube.com/playlist?list={cleaned_playlists[play]}")
+    play = st.multiselect('Select Playlist', options=cleaned_playlists.keys())
+    cleaned_playlists_list = []
+    for i in play:
+        st.caption(f"https://www.youtube.com/playlist?list={cleaned_playlists[i]}")
+        cleaned_playlists_list.append(cleaned_playlists[i])
 
-    return cleaned_playlists[play]
+    return cleaned_playlists_list
+    # return cleaned_playlists[play]
 
 def displayPlaylistItems(youtube,chosen_playlist : str) -> None:
     # Showing the songs in the playlist

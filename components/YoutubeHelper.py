@@ -3,7 +3,7 @@ from streamlit.runtime.caching import cache_data
 import streamlit as st
 
 @cache_data
-def Initialize():
+def InitializeYoutube():
     '''
     Initializes the Youtube API
 
@@ -12,7 +12,7 @@ def Initialize():
     youtube : object
         Youtube API object
     '''
-    api_key = st.secrets['api_key']
+    api_key = st.secrets['youtube']['api_key']
     youtube = build('youtube', 'v3', developerKey=api_key)
     
     return youtube
