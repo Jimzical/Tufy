@@ -33,6 +33,10 @@ def get_channel_id(youtube,channel_name : str) -> str:
     channel_id : str
         Channel ID of the channel
 
+    Examples
+    --------
+    >>> get_channel_id(youtube, 'Google')
+    UC_x5XG1OV2P6uZZ5FSM9Ttw
 
     '''
     req = youtube.search().list(
@@ -64,6 +68,21 @@ def get_all_playlists(youtube, channel_id : str) -> list():
     -------
     playlists : list
         List of playlists created by the channel
+
+    Examples
+    --------
+    >>> get_all_playlists(youtube, 'UC_x5XG1OV2P6uZZ5FSM9Ttw')
+    [
+        {   'Title': 'Playlist 1',
+            'ID': 'PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG',
+            'Description': 'Playlist 1 Description'
+        },
+        {   'Title': 'Playlist 2',
+            'ID': 'PLx0sYbCqOb8Tb2nvn6Ol5_F-48ruhwPJf',
+            'Description': 'Playlist 2 Description'
+        }
+    ]
+
     '''
     playlists = []
     next_page_token = None
@@ -92,8 +111,10 @@ def get_all_playlists(youtube, channel_id : str) -> list():
         if not next_page_token:
             break  # No more playlists
 
-    return playlists
-
+    if playlists:
+        return playlists
+    else:
+        raise Exception('No playlists found')
 
 def playlistInfo(youtube,playlist_id : str) -> dict():
     '''

@@ -11,9 +11,9 @@ Current Issues:
 Updates:
     - Cleaned up Code
     - Added Docstrings
+    - Raise Error on Invalid Channel Name
 
 Future updates:
-    - fixing raise error when user enters invalid channel name
     - fixing channel name cache issue
     - adding spotify functionality
 
@@ -24,24 +24,35 @@ from components.YoutubeHelper import *
 from components.YoutubeElements import *
 from components.SpotifyHelper import *
 
-def YouTubePart():
+
+def main(): 
     st.title('Youtube Channel Information')
     # Create a YouTube API object
     youtube = InitializeYoutube()
+    sp = InitializeSpotify()
 
     tab1,tab2 = st.tabs(["Channel Id","Channel Name"])
-    with tab1:
-        thru_id = throughChannelId(youtube)
-    with tab2:
-        thru_name = throughChannelName(youtube)
-
+    try:
+        with tab1:
+            thru_id = throughChannelId(youtube)
+        with tab2:
+            thru_name = throughChannelName(youtube)
+       
+    except:
+        st.error("Invalid Channel Name")
+        return
+        
     if thru_id:
         channel_id = thru_id
     elif thru_name:
         channel_id = thru_name
 
     # Get all playlists for that channel
-    playlists = get_all_playlists(youtube, channel_id)
+    try:
+        playlists = get_all_playlists(youtube, channel_id)
+    except:
+        st.error("No Playlists Found")
+        return
 
     chosen_playlist = choosePlaylist(playlists)
 
@@ -49,22 +60,25 @@ def YouTubePart():
     chosen_playlist = chosen_playlist[0]
 
     # Display playlist information
-    toggle_display = st.toggle('Display Playlist Items')
-    if toggle_display:
+    toggle_youtube_display = st.toggle('Display Playlist Items')
+    if toggle_youtube_display:
         displayPlaylistItems(youtube,chosen_playlist)
 
+    toggle_spotify_display = st.toggle("Display Spotify Results")
+    if toggle_spotify_display:
+        playlist_songs = returnPlaylistItems(youtube,chosen_playlist)
+        for song in playlist_songs:
+            with st.expander(f"{song}",expanded=True):
+                track_list = searchTrack(sp, song)
+                st.write(track_list)
+                st.markdown(f"https://open.spotify.com/track/{track_list['track_id']}")
+                
 
-def SpotifyPart():
-    sp = InitializeSpotify()
-    track_name = st.text_input('Enter track name')
-    if track_name:
-        track_list = searchTrack(sp, track_name)
-        st.write(track_list)
+    # track_name = st.text_input('Enter track name')
+    # if track_name:
+    #     track_list = searchTrack(sp, track_name)
+    #     st.write(track_list)
 
-
-def main(): 
-    YouTubePart()
-    # SpotifyPart()
 
 if __name__ == '__main__':
     main()
