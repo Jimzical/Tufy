@@ -1,9 +1,5 @@
 .streamlit/secrets.toml
-reference copy/YoutubeChannels.py
-reference copy/YoutubePlaylist.py
 components/__pycache__/
 .cache
 tester.py
-components/__pycache__/YoutubeElements.cpython-310.pyc
-components/YoutubeHelper.py
 data
