@@ -6,16 +6,14 @@ Allows User to get all Playlists for a Channel given its Id or Name.
 
 Current Issues:
     - Remove the default Channel ID
-    - Put all the Functions where they belong
+    - Fix documentation and naming schemes
 Updates:
-    - Cleaned up Code
-    - Added Docstrings
-    - Raise Error on Invalid Channel Name
-
+    - Fixed Oauth Bug where there way an infinite tab opening
+    - Added Create Playlist Feature for Spotify
 Future updates:
     - fixing channel name cache issue
-    - adding spotify functionality
-
+    - adding documentation to new functions
+    - adding songs to playlist in spotify
 '''
 import streamlit as st
 from streamlit import secrets
