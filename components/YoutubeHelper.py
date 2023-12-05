@@ -229,7 +229,7 @@ def playlistInfo(youtube,playlist_id : str) -> dict():
 
 
 # Not sure if this will work or not
-def returnPlaylistItems(youtube,chosen_playlist : str) -> list():
+def returnPlaylistItems(youtube,playlistID : str) -> list():
     '''
     Get all playlists created by a YouTube channel
 
@@ -237,7 +237,7 @@ def returnPlaylistItems(youtube,chosen_playlist : str) -> list():
     ----------
     youtube : object    
         YouTube API object
-    chosen_playlist : str
+    playlistID : str
         Playlist ID of the playlist
 
     Returns
@@ -255,7 +255,7 @@ def returnPlaylistItems(youtube,chosen_playlist : str) -> list():
     ]
     '''
     # Showing the songs in the playlist
-    response = playlistInfo(youtube,chosen_playlist)
+    response = playlistInfo(youtube,playlistID)
     res = response['items']
 
     playlist_items = []

@@ -88,30 +88,48 @@ def chooseChannel(youtube) -> str:
 
     return channel_id
 
-def choosePlaylist(playlists : list, chooseAll = False, testMode = False, markdown = False) -> str:
+def choosePlaylist(playlists : list, chooseAll = False, testMode = False, displayLink = False) -> list:
+    '''
+    Create Streamlit UI to choose multiple playlist
+
+    Parameters
+    ----------
+    playlists : list
+        List of playlists (all playlists for a user)
+    chooseAll : bool, default = False
+        Has all playlists selected by default
+    testMode : bool, default = False
+        Only for debugging
+    displayLink : bool, default = False
+        To Display the link
+
+    Returns
+    -------
+    playlistID_list : list
+        List of all the IDs for all the playlists that are selected
+    '''
     # Display playlists	
-    cleaned_playlists = {}
+    title_id_mapping = {}
     for playlist in playlists:
-        cleaned_playlists[playlist['Title']] = playlist['ID']
+        title_id_mapping[playlist['Title']] = playlist['ID']
 
     # Choosing the playlist
     if chooseAll:
-        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=list(cleaned_playlists.keys()))
+        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys()))
     elif testMode:
-        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=["Loop"])
+        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=["Loop"])
     else:
-        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=list(cleaned_playlists.keys())[0])
+        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys())[0])
 
 
     
-    cleaned_playlists_list = []
-    for i in play:
-        if markdown:
-            st.caption(f"https://www.youtube.com/playlist?list={cleaned_playlists[i]}")
-        cleaned_playlists_list.append(cleaned_playlists[i])
+    playlistID_list = []
+    for chosen_playlist in selected_playlists:
+        if displayLink:
+            st.caption(f"https://www.youtube.com/playlist?list={title_id_mapping[chosen_playlist]}")
+        playlistID_list.append(title_id_mapping[chosen_playlist])
 
-    return cleaned_playlists_list
-    # return cleaned_playlists[play]
+    return playlistID_list
 
 def displayPlaylistItems(youtube,chosen_playlist : str) -> None:
     # Showing the songs in the playlist
@@ -123,3 +141,18 @@ def displayPlaylistItems(youtube,chosen_playlist : str) -> None:
             col1,col2,col3 = st.columns([4,2,2])
             col1.image(i['snippet']['thumbnails']['default']['url'])
             col2.subheader(f"{i['snippet']['title']}  -  {i['snippet']['videoOwnerChannelTitle']}")
+
+def toggleDisplayPlaylistItems(youtube,chosen_playlistID_options : list, id_title_mapping : dict) -> None:
+    toggle_youtube_display = st.toggle('Display Playlist Items')
+    if toggle_youtube_display:
+        total_songs = 0
+        for chosen_playlistID in chosen_playlistID_options:
+            with st.status(f"Gettting Info for {id_title_mapping[chosen_playlistID]}",expanded=True) as status:
+                st.subheader(f"Playlist: {id_title_mapping[chosen_playlistID]}")
+                playlist_songs = returnPlaylistItems(youtube,chosen_playlistID)
+                st.write(playlist_songs)
+                st.write(len(playlist_songs))
+                total_songs += len(playlist_songs)
+            status.update(label="Got all Info", state="complete",expanded=True)
+        st.title(f"`Total Number of Songs ➡️ {total_songs}`")
+    
