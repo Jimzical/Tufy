@@ -1,5 +1,6 @@
 import streamlit as st
 from components.YoutubeHelper import *
+import re
 def throughChannelId(youtube) -> str:
     '''
     Create the Streamlit UI for entering the channel ID
@@ -15,11 +16,19 @@ def throughChannelId(youtube) -> str:
         Channel ID of the channel
     '''
     channel_id = st.text_input('Enter Channel ID', value='UCEXnhgo3qEjrlkDvljtf5xg')
-    if channel_id:
+    # using regex to check if the channel ID is valid. it can either be UCEXnhgo3qEjrlkDvljtf5xg format or https://www.youtube.com/channel/UCEXnhgo3qEjrlkDvljtf5xg format
+    if re.match(r'UC[A-Za-z0-9_-]{22}', channel_id):
+        st.caption(f"https://www.youtube.com/channel/{channel_id}")
+        return channel_id
+
+    elif re.match(r'https://www.youtube.com/channel/UC[A-Za-z0-9_-]{22}', channel_id):
+        channel_id = channel_id[32:]
         st.caption(f"https://www.youtube.com/channel/{channel_id}")
 
         return channel_id
 
+    else:
+        raise ValueError("Invalid Channel ID")
 def throughChannelName(youtube):
     '''
     Create the Streamlit UI for entering the channel name
@@ -79,17 +88,30 @@ def chooseChannel(youtube) -> str:
 
     return channel_id
 
-def choosePlaylist(playlists : list) -> str:
+def choosePlaylist(playlists : list, chooseAll = False, testMode = False, markdown = False) -> str:
     # Display playlists	
     cleaned_playlists = {}
     for playlist in playlists:
         cleaned_playlists[playlist['Title']] = playlist['ID']
 
     # Choosing the playlist
-    play = st.selectbox('Select Playlist',list(cleaned_playlists.keys()))
-    st.caption(f"https://www.youtube.com/playlist?list={cleaned_playlists[play]}")
+    if chooseAll:
+        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=list(cleaned_playlists.keys()))
+    elif testMode:
+        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=["Loop"])
+    else:
+        play = st.multiselect('Select Playlist', options=cleaned_playlists.keys(), default=list(cleaned_playlists.keys())[0])
 
-    return cleaned_playlists[play]
+
+    
+    cleaned_playlists_list = []
+    for i in play:
+        if markdown:
+            st.caption(f"https://www.youtube.com/playlist?list={cleaned_playlists[i]}")
+        cleaned_playlists_list.append(cleaned_playlists[i])
+
+    return cleaned_playlists_list
+    # return cleaned_playlists[play]
 
 def displayPlaylistItems(youtube,chosen_playlist : str) -> None:
     # Showing the songs in the playlist
@@ -101,4 +123,3 @@ def displayPlaylistItems(youtube,chosen_playlist : str) -> None:
             col1,col2,col3 = st.columns([4,2,2])
             col1.image(i['snippet']['thumbnails']['default']['url'])
             col2.subheader(f"{i['snippet']['title']}  -  {i['snippet']['videoOwnerChannelTitle']}")
-

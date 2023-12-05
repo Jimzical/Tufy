@@ -1,9 +1,24 @@
 from googleapiclient.discovery import build
 from streamlit.runtime.caching import cache_data
-import streamlit as st
+from streamlit import secrets
+'''
+This Module contains all the functions required to interact with the Youtube API
+
+Functions
+---------
+InitializeYoutube()
+    Initializes the Youtube API
+get_channel_id(youtube,channel_name : str) -> str
+    Get channel ID from channel name
+get_all_playlists(youtube, channel_id : str) -> list()
+    Get all playlists created by a YouTube channel
+playlistInfo(youtube,playlist_id : str) -> dict()
+    Get all playlists created by a YouTube channel
+'''
+
 
 @cache_data
-def Initialize():
+def InitializeYoutube():
     '''
     Initializes the Youtube API
 
@@ -12,7 +27,7 @@ def Initialize():
     youtube : object
         Youtube API object
     '''
-    api_key = st.secrets['api_key']
+    api_key = secrets['youtube']['api_key']
     youtube = build('youtube', 'v3', developerKey=api_key)
     
     return youtube
@@ -33,6 +48,10 @@ def get_channel_id(youtube,channel_name : str) -> str:
     channel_id : str
         Channel ID of the channel
 
+    Examples
+    --------
+    >>> get_channel_id(youtube, 'Google')
+    UC_x5XG1OV2P6uZZ5FSM9Ttw
 
     '''
     req = youtube.search().list(
@@ -64,6 +83,21 @@ def get_all_playlists(youtube, channel_id : str) -> list():
     -------
     playlists : list
         List of playlists created by the channel
+
+    Examples
+    --------
+    >>> get_all_playlists(youtube, 'UC_x5XG1OV2P6uZZ5FSM9Ttw')
+    [
+        {   'Title': 'Playlist 1',
+            'ID': 'PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG',
+            'Description': 'Playlist 1 Description'
+        },
+        {   'Title': 'Playlist 2',
+            'ID': 'PLx0sYbCqOb8Tb2nvn6Ol5_F-48ruhwPJf',
+            'Description': 'Playlist 2 Description'
+        }
+    ]
+
     '''
     playlists = []
     next_page_token = None
@@ -92,8 +126,10 @@ def get_all_playlists(youtube, channel_id : str) -> list():
         if not next_page_token:
             break  # No more playlists
 
-    return playlists
-
+    if playlists:
+        return playlists
+    else:
+        raise Exception('No playlists found')
 
 def playlistInfo(youtube,playlist_id : str) -> dict():
     '''
@@ -110,6 +146,66 @@ def playlistInfo(youtube,playlist_id : str) -> dict():
     -------
     response : dict
         Response of the API call
+
+    Examples
+    --------
+    >>> playlistInfo(youtube, 'PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG')
+    {
+        'kind': 'youtube#playlistItemListResponse',
+        'etag': '...',
+        'nextPageToken': '...',
+        'items': [
+            {
+                'kind': 'youtube#playlistItem',
+                'etag': '...',
+                'id': '...',
+                'snippet': {
+                    'publishedAt': '...',
+                    'channelId': '...',
+                    'title': '...',
+                    'description': '...',
+                    'thumbnails': {
+                        'default': {
+                            'url': '...',
+                            'width': 120,
+                            'height': 90
+                        },
+                        'medium': {
+                            'url': '...',
+                            'width': 320,
+                            'height': 180
+                        },
+                        'high': {
+                            'url': '...',
+                            'width': 480,
+                            'height': 360
+                        },
+                        'standard': {
+                            'url': '...',
+                            'width': 640,
+                            'height': 480
+                        },
+                        'maxres': {
+                            'url': '...',
+                            'width': 1280,
+                            'height': 720
+                        }
+                    },
+                    'channelTitle': '...',
+                    'playlistId': '...',
+                    'position': 0,
+                    'resourceId': {
+                        'kind': 'youtube#video',
+                        'videoId': '...'
+                    }
+                },
+                'contentDetails': {
+                    'videoId': '...',
+                    'videoPublishedAt': '...'
+                }
+            }
+        ]
+    }
     '''
     request = youtube.playlistItems().list(
         part="snippet,contentDetails",
@@ -131,3 +227,45 @@ def playlistInfo(youtube,playlist_id : str) -> dict():
     
     return response
 
+
+# Not sure if this will work or not
+def returnPlaylistItems(youtube,chosen_playlist : str) -> list():
+    '''
+    Get all playlists created by a YouTube channel
+
+    Parameters
+    ----------
+    youtube : object    
+        YouTube API object
+    chosen_playlist : str
+        Playlist ID of the playlist
+
+    Returns
+    -------
+    playlist_items : list
+        List of all the songs in the playlist
+
+    Examples
+    --------
+    >>> returnPlaylistItems(youtube, 'PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG')
+    [
+        'Song 1 by Artist 1 - Description',
+        'Song 2 - Description', # Incase Song is but youtube's autogenerated channels
+        'Song 3 by Artist 3 - Description'
+    ]
+    '''
+    # Showing the songs in the playlist
+    response = playlistInfo(youtube,chosen_playlist)
+    res = response['items']
+
+    playlist_items = []
+    for i in res:
+        try:
+            playlist_items.append(f"{i['snippet']['title']} by {i['snippet']['videoOwnerChannelTitle']} - {i['snippet']['description'][:30]}")
+        except KeyError as e:
+            if 'videoOwnerChannelTitle' in str(e):
+                playlist_items.append(f"{i['snippet']['title']} by - {i['snippet']['description'][:30]}")
+            elif 'description' in str(e):
+                playlist_items.append(f"{i['snippet']['title']}")
+
+    return playlist_items
