@@ -1,5 +1,5 @@
 '''
-Version: 0.3.0
+Version: 0.4.0
 Date: 03-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
