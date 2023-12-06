@@ -1,3 +1,7 @@
+'''
+This file contains all the functions that are used to create the Streamlit UI for the Youtube section
+'''
+
 import streamlit as st
 from components.YoutubeHelper import *
 import re

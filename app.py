@@ -1,27 +1,30 @@
 '''
-Version: 0.5.0
+Version: 0.5.1
 Date: 03-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
 
 Current Issues:
+    - Test changes in SpSpotifyHelper 
     - Put all the Functions where they belong
     - Remove the default Channel ID
     - Remove testMode from choosePlaylist in YoutubeElements
 Updates:
-    -
+    - Fixed Naming Schemes to be Clearer
+    - Added SpotifyHelper Documentation
 Future updates:
     - fixing channel name cache issue
 '''
 import streamlit as st
 from streamlit import secrets
 from googleapiclient.discovery import build
+from components.helper_components import ColoredHeader
 from components.YoutubeHelper import *
 from components.YoutubeElements import *
 from components.SpotifyHelper import *
-
+from components.SpotifyElements import *
 def main(): 
-    st.title('Youtube Channel Information')
+    ColoredHeader('Youtube Channel Information',anchor=False)
     # Create a YouTube API object
     youtube = InitializeYoutube()
 
@@ -57,84 +60,55 @@ def main():
         st.error("No Playlists Found")
         return
 
-    playlist_IDs = choosePlaylist(playlists, testMode=True)
+    youtube_playlistIDs = choosePlaylist(playlists, testMode=True)
 
 
-    playlist_id_title_mapping = {}
+    playlist_id_title_dict = {}
     for playlist in playlists:
-        playlist_id_title_mapping[playlist['ID']] = playlist['Title']
+        playlist_id_title_dict[playlist['ID']] = playlist['Title']
     
     # Youtube Display Stuff 
-    toggleDisplayPlaylistItems(youtube,playlist_IDs,playlist_id_title_mapping)
+    toggleDisplayPlaylistItems(youtube,youtube_playlistIDs,playlist_id_title_dict)
 
     # Spotify Stuff
     toggle_spotify_display = st.toggle("Display Spotify Results")
     if toggle_spotify_display:
-        st.title("Getting the Spotify URIs")
-        track_details = {}
-        youtube_to_spotfiy_songID = {} 
-
-        # for each youtube playlist 
-        for chosen_playlistID in playlist_IDs:
-            playlist_name = playlist_id_title_mapping[chosen_playlistID]
-            st.subheader(f"Playlist: {playlist_name}")
-
-            playlist_songs = returnPlaylistItems(youtube,chosen_playlistID)
-            # Example
-            # --------
-            # youtube_to_spotify_songIDs = {
-            #     "playlist 1" : {
-            #         "song 1" : "song id", 
-            #         "song 2" : "song id",
-            #         "song 3" : "song id"
-            #     }
-            # }
-
-            # Initialising a list for each playlist
-            youtube_to_spotfiy_songID[playlist_name] = []
-
-            counter = 0
-            with st.status(f"Gettting Info for {playlist_name}",expanded=True) as status:
-                for song in playlist_songs:
-                    track_data = searchTrack(spc, song)
-                    
-                    track_details[playlist_name][track_data["track_name"]] = track_data["track_id"]
-
-                    # appeding {name : id} to the list of songs to the list with the key as playlist name in this main dict 
-                    youtube_to_spotfiy_songID[playlist_name].append({track_data['track_name'] : track_data['track_id']})
-                    
-                    
-                    counter = counter + 1
-                    st.markdown(f"{counter}: {track_data['track_name']} ->  https://open.spotify.com/track/{track_data['track_id']}")
-                status.update(label="Got all Info", state="complete",expanded=False)
-                st.toast(f"Completed Playlist: {playlist_name}")
-
-            st.write(youtube_to_spotfiy_songID)
-        st.toast("Completed All")
-
+        youtube_to_spotify_songIDs = getYoutubeToSpotifySongIDs(youtube,spc,youtube_playlistIDs,playlist_id_title_dict)
+    
     with st.sidebar:
+        ColoredHeader("Start Creating Playlist!")
         me = sp.current_user()
-        st.write(me)
 
         # Get current user's playlists
         user_playlists = sp.current_user_playlists()
-        # user_playlists_name_list = [playlist["name"] for playlist in user_playlists["items"]]
-        user_playlists_name_list = [playlist["name"].lower().strip() for playlist in user_playlists["items"]]
+        userPlaylistsName_list = [playlist["name"].lower().strip() for playlist in user_playlists["items"]]
+        userPlaylistName_ID_dict = {playlist["name"].lower().strip(): playlist["id"] for playlist in user_playlists["items"]}
 
-        # st.subheader("user_playlists_name_list")
-        # st.write(user_playlists_name_list)
 
-        # for chosen_playlistID in playlist_IDs:
-        #     # if not exist in account lib add
-        #     if playlist_id_title_mapping[chosen_playlistID].strip().lower() in user_playlists_name_list:
-        #         break
 
-        #     sp.user_playlist_create(
-        #         user=me["id"],
-        #         name=playlist_id_title_mapping[chosen_playlistID]
-        #     )
-        #     st.toast(f"Added Spotify Playlist called {playlist_id_title_mapping[chosen_playlistID]}")
-        # st.toast("Created all Necessary Playlist!")
+        if st.toggle("Display Existing Playlist Names"):
+            st.write(userPlaylistName_ID_dict)
+
+        create_playlist = st.button("Create Playlist",help="Recommended before adding songs",use_container_width=True)
+        
+        if create_playlist:    
+            for chosen_playlistID in playlist_IDs:
+                playlist_name = playlist_id_title_dict[chosen_playlistID]
+                # if not exist in account lib add
+                if playlist_name.strip().lower() in userPlaylistsName_list:
+                    break
+
+                sp.user_playlist_create(
+                    user=me["id"],
+                    name=playlist_name
+                )
+                st.toast(f"Added Spotify Playlist called {playlist_name}")
+            st.toast("Created all Necessary Playlist!")
+        for chosen_playlistID in playlist_IDs:
+            playlist_name = playlist_id_title_dict[chosen_playlistID]
+            if playlist_name.strip().lower() in userPlaylistsName_list:
+                break
+
 
 
 if __name__ == '__main__':
