@@ -19,8 +19,8 @@ A Web Application to Convert Playlists from a YouTube Channel to Spotify Playlis
     ```
 3. Create `.streamlit/secrets.toml`
     ```sh
-    mkdir .streamlit
-    touch .streamlit/secrets.toml
+    cd .streamlit
+    touch secrets.toml
     ```
 
 4. Add the following to `secrets.toml`
@@ -54,10 +54,12 @@ A Web Application to Convert Playlists from a YouTube Channel to Spotify Playlis
 2. Select the `Playlists` you want to Convert
 3. Click the `Add Songs` Button
 
-
-## Future Updates
+## Updates
 - Put all functions in their respective files
 - Clean up code
+- Fixed the Error where button needed to be double clicked to work
+
+## Future Updates
 - Deploy Website
 
 

@@ -9,7 +9,7 @@ import components.SpotifyElements as se
 
 def Authentication() -> dict():
     # Create a YouTube API object
-    youtube = yh.InitializeYoutube()
+    youtube = yh.InitializeYoutube(secrets["youtube"]["api_key"])
     sp_oauth = sh.StreamlitInitializeSpotifyAuth(
         client_id = secrets["spotify"]["client_id"],
         client_secret = secrets["spotify"]["client_secret"],

@@ -1,5 +1,5 @@
 '''
-Version: 1.2.0
+Version: 1.2.1
 Date: 9-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
@@ -8,10 +8,9 @@ Allows User to get all Playlists for a Channel given its Id or Name.
 Updates:
     - Cleaned up code
     - Put all functions in their respective files
+    - Fixed the Error where button needed to be double clicked to work
 Future updates:
     - Deploy Website
-Current Issues:
-    - Error where if playlist doesnt exist, the button has to be clicked twice
 '''
 import streamlit as st
 from streamlit import secrets

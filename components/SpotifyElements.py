@@ -122,10 +122,12 @@ def SpotifyIntegration(youtube : object,sp : object, spc : object, yt_chosen_pla
             if playlist_name in sp_userPlaylistsName_list:
                 st.toast(f"Playlist {playlist_name} already exists")
             else:
-                sp.user_playlist_create(
+                new_playlist = sp.user_playlist_create(
                     user=me["id"],
                     name=playlist_name
                 )
+
+                sp_userPlaylist_to_uri_dict[playlist_name] = new_playlist["uri"]
                 st.toast(f"Added Spotify Playlist called {playlist_name}")
         
         Notif(message = "Created all Necessary Playlist!")
