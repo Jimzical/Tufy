@@ -1,11 +1,8 @@
 import streamlit as st
 from streamlit import secrets
 from googleapiclient.discovery import build
-from components.HelperComponents import ColoredHeader, Notif
 import components.YoutubeHelper as yh
-import components.YoutubeElements as ye
 import components.SpotifyHelper as sh
-import components.SpotifyElements as se
 
 def Authentication() -> dict():
     # Create a YouTube API object

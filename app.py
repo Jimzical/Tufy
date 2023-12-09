@@ -15,7 +15,7 @@ Future updates:
 import streamlit as st
 from streamlit import secrets
 from googleapiclient.discovery import build
-from components.HelperComponents import ColoredHeader, Notif
+import components.HelperComponents as hc
 import components.YoutubeHelper as yh
 import components.YoutubeElements as ye
 import components.SpotifyHelper as sh
@@ -23,7 +23,7 @@ import components.SpotifyElements as se
 import components.YoutubeToSpotify as yts
 
 def main(): 
-    ColoredHeader('Youtube Channel Information',anchor=False)
+    hc.ColoredHeader('Youtube Channel Information',anchor=False)
 
     # ------------------------------ Authentication -------------------------
     
@@ -45,7 +45,7 @@ def main():
     # ------------------------------ Spotify -------------------------------
     # Spotify Playlist IDs
     with st.sidebar:
-        ColoredHeader("Start Creating Playlist!")
+        hc.ColoredHeader("Start Creating Playlist!")
         se.SpotifyIntegration(youtube, sp, spc, yt_chosen_playlistIDs)
 
 if __name__ == '__main__':
