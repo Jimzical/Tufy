@@ -42,8 +42,17 @@ A Web Application to Convert Playlists from a YouTube Channel to Spotify Playlis
 
 ## Usage
 1. Enter the YouTube Channel ID
-2. Select the playlists you want to convert
-3. Click the `Add Songs` button
+    - To get your `Own Channel ID`
+        - Go to your Channel and copy the ID from the URL
+        > Example: https://www.youtube.com/channel/UCPKlrgZXnnb89nSeITvTdGA
+        </br>
+        Your channel ID is `UCPKlrgZXnnb89nSeITvTdGA`
+    - To get `Another Channel's ID`
+        - Go to their `About page` 
+        - Click on the `Share` Button
+        - Click on the `Copy Channel ID` Button
+2. Select the `Playlists` you want to Convert
+3. Click the `Add Songs` Button
 
 
 ## Future Updates
