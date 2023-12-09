@@ -12,6 +12,7 @@ Future updates:
     - Clean up code
     - Deploy Website
 Current Issues:
+    - Test Channel Name search
     - Remove testMode
     - Remove defalut user
     - Error where if playlist doesnt exist, the button has to be clicked twice
@@ -73,7 +74,7 @@ def main():
         st.error("No Playlists Found")
         return
 
-    yt_chosen_playlistIDs = ye.choosePlaylist(yt_channel_playlists, testMode=True)
+    yt_chosen_playlistIDs = ye.choosePlaylist(yt_channel_playlists, testMode=False)
 
     # Youtube Display Stuff
     if st.toggle("Display Youtube Results"):

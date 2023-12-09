@@ -92,7 +92,7 @@ def chooseChannel(youtube) -> str:
 
     return channel_id
 
-def choosePlaylist(playlists : list, chooseAll = False, testMode = False, displayLink = False) -> dict:
+def choosePlaylist(playlists : list, testMode = False) -> dict:
     '''
     Create Streamlit UI to choose multiple playlist
 
@@ -100,12 +100,8 @@ def choosePlaylist(playlists : list, chooseAll = False, testMode = False, displa
     ----------
     playlists : list
         List of playlists (all playlists for a user)
-    chooseAll : bool, default = False
-        Has all playlists selected by default
     testMode : bool, default = False
         Only for debugging
-    displayLink : bool, default = False
-        To Display the link
 
     Returns
     -------
@@ -114,7 +110,7 @@ def choosePlaylist(playlists : list, chooseAll = False, testMode = False, displa
 
     Examples
     --------
-    >>> yt_playlistIDs = choosePlaylist(playlists, chooseAll = False, testMode = False, displayLink = False)
+    >>> yt_playlistIDs = choosePlaylist(playlists, testMode = False)
     {
         "playlist_title 1" : "playlist_id 1",
         "playlist_title 2" : "playlist_id 2",
@@ -127,9 +123,7 @@ def choosePlaylist(playlists : list, chooseAll = False, testMode = False, displa
         title_id_mapping[playlist['Title']] = playlist['ID']
 
     # Choosing the playlist
-    if chooseAll:
-        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys()))
-    elif testMode:
+    if testMode:
         selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=["Loop"])
     else:
         selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys())[0])
@@ -138,8 +132,6 @@ def choosePlaylist(playlists : list, chooseAll = False, testMode = False, displa
     # for all the selected playlists, get the playlist ID
     for chosen_playlist in selected_playlists:
         playlistID_dict[chosen_playlist] = title_id_mapping[chosen_playlist]
-        if displayLink:
-            st.caption(f"https://www.youtube.com/playlist?list={title_id_mapping[chosen_playlist]}")
 
     return playlistID_dict
 
