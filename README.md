@@ -46,7 +46,9 @@ A Web Application to Convert Playlists from a YouTube Channel to Spotify Playlis
         - Go to your Channel and copy the ID from the URL
         > Example: https://www.youtube.com/channel/UCPKlrgZXnnb89nSeITvTdGA
         </br>
-        Your channel ID is `UCPKlrgZXnnb89nSeITvTdGA`
+        Your Channel ID is
+        </br>
+        UCPKlrgZXnnb89nSeITvTdGA
     - To get `Another Channel's ID`
         - Go to their `About page` 
         - Click on the `Share` Button
@@ -63,4 +65,5 @@ A Web Application to Convert Playlists from a YouTube Channel to Spotify Playlis
 
 
 ## Contact
+Github: https://github.com/Jimzical
 Project Link: https://github.com/Jimzical/Tufy
