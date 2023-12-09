@@ -1,4 +1,22 @@
+'''
+Version: 1.0.0
+Date: 9-12-2023
 
+Allows User to get all Playlists for a Channel given its Id or Name.
+
+
+Updates:
+    - Converts Youtube Playlist to Spotify Playlist
+Future updates:
+    - Put all functions in their respective files
+    - Clean up code
+    - Deploy Website
+Current Issues:
+    - Test Channel Name search
+    - Remove testMode
+    - Remove defalut user
+    - Error where if playlist doesnt exist, the button has to be clicked twice
+'''
 import streamlit as st
 from streamlit import secrets
 from googleapiclient.discovery import build
