@@ -1,20 +1,3 @@
-'''
-Version: 0.4.0
-Date: 03-12-2023
-
-Allows User to get all Playlists for a Channel given its Id or Name.
-
-Current Issues:
-    - Remove the default Channel ID
-    - Fix documentation and naming schemes
-Updates:
-    - Fixed Oauth Bug where there way an infinite tab opening
-    - Added Create Playlist Feature for Spotify
-Future updates:
-    - fixing channel name cache issue
-    - adding documentation to new functions
-    - adding songs to playlist in spotify
-'''
 import streamlit as st
 from streamlit import secrets
 from googleapiclient.discovery import build
