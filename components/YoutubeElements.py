@@ -19,10 +19,10 @@ def throughChannelId(youtube) -> str:
     channel_id : str
         Channel ID of the channel
     '''
-    channel_id = st.text_input('Enter Channel ID', value='UCEXnhgo3qEjrlkDvljtf5xg')
+    channel_id = st.text_input('Enter Channel ID', value='UCPKlrgZXnnb89nSeITvTdGA')
     # using regex to check if the channel ID is valid. it can either be UCEXnhgo3qEjrlkDvljtf5xg format or https://www.youtube.com/channel/UCEXnhgo3qEjrlkDvljtf5xg format
     if re.match(r'UC[A-Za-z0-9_-]{22}', channel_id):
-        st.caption(f"https://www.youtube.com/channel/{channel_id}")
+        st.caption(f"https://www.youtube.com/channel/{channel_id}",help = "You Can Click the Link to Verify the Channel")
         return channel_id
 
     elif re.match(r'https://www.youtube.com/channel/UC[A-Za-z0-9_-]{22}', channel_id):
@@ -77,20 +77,22 @@ def chooseChannel(youtube) -> str:
     channel_id : str
         Channel ID of the channel
     '''
-    tab1,tab2 = st.tabs(["Channel Id","Channel Name"])
-    with tab1:
-        thru_id = throughChannelId(youtube)
-        st.write("Channel ID:")
-    with tab2:
-        thru_name = throughChannelName(youtube)
-
-    # Fix for using Tabs
-    if thru_id:
-        channel_id = thru_id
-    if thru_name:
-        channel_id = thru_name
-
+    channel_id =throughChannelId(youtube)
     return channel_id
+    # tab1,tab2 = st.tabs(["Channel Id","Channel Name"])
+    # with tab1:
+    #     thru_id = throughChannelId(youtube)
+    #     st.write("Channel ID:")
+    # with tab2:
+    #     thru_name = throughChannelName(youtube)
+
+    # # Fix for using Tabs
+    # if thru_id:
+    #     channel_id = thru_id
+    # if thru_name:
+    #     channel_id = thru_name
+
+    # return channel_id
 
 def choosePlaylist(playlists : list, testMode = False) -> dict:
     '''
@@ -126,7 +128,7 @@ def choosePlaylist(playlists : list, testMode = False) -> dict:
     if testMode:
         selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=["Loop"])
     else:
-        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys())[0])
+        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys())[-1])
 
     playlistID_dict = {}
     # for all the selected playlists, get the playlist ID
