@@ -1,11 +1,14 @@
 '''
 This file contains all the functions that are used to create the Streamlit UI for the Youtube section
+
+Future Updates:
+    - Change { from components.YoutubeHelper import * } to { import components.YoutubeHelper as yh }        
 '''
 
 import streamlit as st
 from components.YoutubeHelper import *
 import re
-def throughChannelId(youtube) -> str:
+def throughChannelId(youtube : object) -> str:
     '''
     Create the Streamlit UI for entering the channel ID
 
@@ -20,6 +23,8 @@ def throughChannelId(youtube) -> str:
         Channel ID of the channel
     '''
     channel_id = st.text_input('Enter Channel ID', value='UCPKlrgZXnnb89nSeITvTdGA')
+    # channel_id = st.text_input('Enter Channel ID', value='UCEXnhgo3qEjrlkDvljtf5xg')
+
     # using regex to check if the channel ID is valid. it can either be UCEXnhgo3qEjrlkDvljtf5xg format or https://www.youtube.com/channel/UCEXnhgo3qEjrlkDvljtf5xg format
     if re.match(r'UC[A-Za-z0-9_-]{22}', channel_id):
         st.caption(f"https://www.youtube.com/channel/{channel_id}",help = "You Can Click the Link to Verify the Channel")
@@ -33,7 +38,7 @@ def throughChannelId(youtube) -> str:
 
     else:
         raise ValueError("Invalid Channel ID")
-def throughChannelName(youtube):
+def throughChannelName(youtube : object):
     '''
     Create the Streamlit UI for entering the channel name
 
@@ -63,7 +68,7 @@ def throughChannelName(youtube):
         st.markdown(f"https://www.youtube.com/channel/{channel_id}")
         return channel_id
 
-def chooseChannel(youtube) -> str:
+def chooseChannel(youtube : object) -> str:
     '''
     Create the Streamlit UI to get the channel ID
 
@@ -79,20 +84,6 @@ def chooseChannel(youtube) -> str:
     '''
     channel_id =throughChannelId(youtube)
     return channel_id
-    # tab1,tab2 = st.tabs(["Channel Id","Channel Name"])
-    # with tab1:
-    #     thru_id = throughChannelId(youtube)
-    #     st.write("Channel ID:")
-    # with tab2:
-    #     thru_name = throughChannelName(youtube)
-
-    # # Fix for using Tabs
-    # if thru_id:
-    #     channel_id = thru_id
-    # if thru_name:
-    #     channel_id = thru_name
-
-    # return channel_id
 
 def choosePlaylist(playlists : list, testMode = False) -> dict:
     '''
@@ -137,20 +128,28 @@ def choosePlaylist(playlists : list, testMode = False) -> dict:
 
     return playlistID_dict
 
-    
-    # playlistID_list = []
-    # for chosen_playlist in selected_playlists:
-    #     if displayLink:
-    #         st.caption(f"https://www.youtube.com/playlist?list={title_id_mapping[chosen_playlist]}")
-    #     playlistID_list.append(title_id_mapping[chosen_playlist])
 
-    # return playlistID_list
+def displayPlaylistItems(youtube : object, yt_chosen_playlistIDs : dict) -> None:
+    '''
+    Create Streamlit UI to display the playlist items
 
+    Parameters
+    ----------
+    youtube : object
+        Youtube API object
+    yt_chosen_playlistIDs : dict
+        Dictionary of playlist ID and playlist title
 
+    Examples
+    --------
+    >>> yt_playlistIDs = {
+        "playlist 1" : "id 1",
+        "playlist 2" : "id 2",
+        "playlist 3" : "id 3"
+    }
 
-
-
-def displayPlaylistItems(youtube,yt_chosen_playlistIDs : dict) -> None:
+    >>> displayPlaylistItems(youtube, yt_playlistIDs)
+    '''
     for chosen_playlistID in yt_chosen_playlistIDs.keys():
         # Showing the songs in the playlist
         response = playlistInfo(youtube,yt_chosen_playlistIDs[chosen_playlistID])
@@ -165,8 +164,28 @@ def displayPlaylistItems(youtube,yt_chosen_playlistIDs : dict) -> None:
                 col2.write(f"{i['snippet']['title']}")
                 col3.write(f"by  {i['snippet']['videoOwnerChannelTitle']}")
 
-def toggleDisplayPlaylistItems(youtube,chosen_playlistIDs : dict) -> None:
-    
+# Was a test feature
+def toggleDisplayPlaylistItems(youtube : object, chosen_playlistIDs : dict) -> None:
+    '''
+    Create Streamlit UI to toggle the display of the playlist items
+
+    Parameters
+    ----------
+    youtube : object
+        Youtube API object
+    chosen_playlistIDs : dict
+        Dictionary of playlist ID and playlist title
+
+    Examples
+    --------
+    >>> yt_playlistIDs = {
+        "playlist 1" : "id 1",
+        "playlist 2" : "id 2",
+        "playlist 3" : "id 3"
+    }
+
+    >>> toggleDisplayPlaylistItems(youtube, yt_playlistIDs)
+    '''
     toggle_youtube_display = st.toggle('Display Playlist Items')
     
     if toggle_youtube_display:
@@ -182,3 +201,66 @@ def toggleDisplayPlaylistItems(youtube,chosen_playlistIDs : dict) -> None:
             status.update(label="Got all Info", state="complete",expanded=True)
         st.title(f"`Total Number of Songs ➡️ {total_songs}`")
     
+
+def youtubeData(youtube : object) -> None:
+    '''
+    Create Streamlit UI to get the Youtube data
+
+    Parameters
+    ----------
+    youtube : object
+        Youtube API object
+
+    Returns
+    -------
+    yt_chosen_playlistIDs : dict
+        Dictionary of playlist ID and playlist title
+
+    Examples
+    --------
+    >>> yt_playlistIDs = youtubeData(youtube)
+    {
+        "playlist_title 1" : "playlist_id 1",
+        "playlist_title 2" : "playlist_id 2",
+        "playlist_title 3" : "playlist_id 3",
+    }
+    '''
+
+    yt_channel_id = chooseChannel(youtube)
+
+    # Get all yt_channel_playlists for that channel
+    try:
+        yt_channel_playlists = get_all_playlists(youtube, yt_channel_id)
+    except:
+        st.error("No Playlists Found")
+        return
+
+    yt_chosen_playlistIDs = choosePlaylist(yt_channel_playlists, testMode=False)
+
+    return yt_chosen_playlistIDs
+
+def youtubeDisplayElements(youtube, yt_chosen_playlistIDs : dict) -> None:
+    '''
+    Create Streamlit UI for displaying the Youtube information
+
+    Parameters
+    ----------
+    youtube : object
+        Youtube API object
+    yt_chosen_playlistIDs : dict
+        Dictionary of playlist ID and playlist title
+
+    Examples
+    --------
+    >>> yt_playlistIDs = {
+        "playlist 1" : "id 1",
+        "playlist 2" : "id 2",
+        "playlist 3" : "id 3"
+    }
+
+    >>> youtubeDisplayElements(youtube, yt_playlistIDs)
+    '''
+    if st.toggle("Display Youtube Results"):
+        # stuff = st.contr
+        with st.container(border=True):
+            displayPlaylistItems(youtube,yt_chosen_playlistIDs) 

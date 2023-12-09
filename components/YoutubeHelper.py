@@ -37,7 +37,7 @@ playlistInfo(youtube,playlist_id : str) -> dict()
 
 
 @cache_data
-def InitializeYoutube():
+def InitializeYoutube() -> object:
     '''
     Initializes the Youtube API
 
@@ -50,7 +50,7 @@ def InitializeYoutube():
     youtube = build('youtube', 'v3', developerKey=api_key)
     
     return youtube
-def get_channel_id(youtube,channel_name : str) -> str:
+def get_channel_id(youtube : object, channel_name : str) -> str:
     '''
     Get channel ID from channel name    
 
@@ -87,7 +87,7 @@ def get_channel_id(youtube,channel_name : str) -> str:
     except:
         return 'Channel not found'
 
-def get_all_playlists(youtube, channel_id : str) -> list():
+def get_all_playlists(youtube : object, channel_id : str) -> list():
     '''
     Get all playlists created by a YouTube channel
 
@@ -150,7 +150,7 @@ def get_all_playlists(youtube, channel_id : str) -> list():
     else:
         raise Exception('No playlists found')
 
-def playlistInfo(youtube,playlist_id : str) -> dict():
+def playlistInfo(youtube : object, playlist_id : str) -> dict():
     '''
     Get all the info for a playlist
 
@@ -247,7 +247,7 @@ def playlistInfo(youtube,playlist_id : str) -> dict():
     
     return response
 
-def returnPlaylistItems(youtube,playlistID : str) -> list():
+def returnPlaylistItems(youtube : object, playlistID : str) -> list():
     '''
     Get all playlists created by a YouTube channel
 
