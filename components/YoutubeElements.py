@@ -156,16 +156,20 @@ def choosePlaylist(playlists : list, chooseAll = False, testMode = False, displa
 
 
 
-def displayPlaylistItems(youtube,chosen_playlist : str) -> None:
-    # Showing the songs in the playlist
-    response = playlistInfo(youtube,chosen_playlist)
-    res = response['items']
+def displayPlaylistItems(youtube,yt_chosen_playlistIDs : dict) -> None:
+    for chosen_playlistID in yt_chosen_playlistIDs.keys():
+        # Showing the songs in the playlist
+        response = playlistInfo(youtube,yt_chosen_playlistIDs[chosen_playlistID])
+        res = response['items']
 
-    for i in res:
-        with st.expander(i['snippet']['title'],expanded=True):
-            col1,col2,col3 = st.columns([4,2,2])
-            col1.image(i['snippet']['thumbnails']['default']['url'])
-            col2.subheader(f"{i['snippet']['title']}  -  {i['snippet']['videoOwnerChannelTitle']}")
+        st.subheader(f"Playlist: {chosen_playlistID}")
+        for i in res:
+            with st.expander(i['snippet']['title'],expanded=False):
+                col1,col2,col3 = st.columns([1.5,2,2])
+                # col1.markdown(f'<img src="{i["snippet"]["thumbnails"]["default"]["url"]}" alt="Thumbnail" style="max-width:100%;">', unsafe_allow_html=True)
+                col1.image(i['snippet']['thumbnails']['default']['url'], use_column_width=True)
+                col2.write(f"{i['snippet']['title']}")
+                col3.write(f"by  {i['snippet']['videoOwnerChannelTitle']}")
 
 def toggleDisplayPlaylistItems(youtube,chosen_playlistIDs : dict) -> None:
     

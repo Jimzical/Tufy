@@ -4,19 +4,18 @@ This file contains helper functions for the Spotify API
 
 Functions
 ---------
-InitializeSpotify(client_id,client_secret,redirect_uri,openBrowser = True) -> object
+InitializeSpotify(client_id : str, client_secret : str, redirect_uri : str, openBrowser = True) -> object
     Initializes the Spotify API
-StreamlitInitializeSpotifyAuth(client_id,client_secret,redirect_uri) -> object
+StreamlitInitializeSpotifyAuth(client_id : str, client_secret : str, redirect_uri : str) -> object
     Initializes the Spotify API for Streamlit
-getAuthLink(sp_oauth) -> str
+getAuthLink(sp_oauth : object) -> str
     Gets the authorization link for Spotify
-FinalzieAuth(sp_oauth,auth_code) -> object
+FinalzieAuth(sp_oauth : object,auth_code  : str) -> object
     Finalizes the authorization for Spotify
-InitializeSpotifyClient(client_id,client_secret) -> object
+InitializeSpotifyClient(client_id : str, client_secret : str) -> object
     Initializes the Spotify API for client credentials
-searchTrack(sp, track_name : str, explicit : bool = False) -> list()
+searchTrack(sp : object, track_name : str, explicit : bool = False) -> list()
     Search for a track on Spotify
-
 '''
 
 import spotipy
@@ -84,7 +83,7 @@ def StreamlitInitializeSpotifyAuth(client_id : str, client_secret : str, redirec
                             open_browser=False)
     return sp_oauth
 
-def getAuthLink(sp_oauth) -> str:
+def getAuthLink(sp_oauth : object) -> str:
     '''
     Gets the Authorization Link for Spotify
 
@@ -108,7 +107,7 @@ def getAuthLink(sp_oauth) -> str:
     auth_url = sp_oauth.get_authorize_url()
     return auth_url
     
-def FinalzieAuth(sp_oauth, auth_code : str) -> object:
+def FinalzieAuth(sp_oauth : object, auth_code : str) -> object:
     '''
     Finalizes the authorization for Spotify
 
@@ -158,7 +157,7 @@ def InitializeSpotifyClient(client_id : str, client_secret : str) -> object():
                                                                 ))
     return spc
 
-def searchTrack(sp, track_name : str, explicit : bool = False) -> list():
+def searchTrack(sp : object, track_name : str, explicit : bool = False) -> list():
     '''
     Search for a track on Spotify
 

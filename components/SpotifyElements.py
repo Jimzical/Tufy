@@ -6,12 +6,37 @@ import streamlit as st
 from components.YoutubeHelper import *
 from components.SpotifyHelper import *
 
-def getYoutubeToSpotifySongIDs(youtube,spc,yt_playlistIDs) -> dict():
+def getYoutubeToSpotifySongIDs(youtube : object,spc : object,yt_playlistIDs : dict) -> dict():
     '''
+    Get the Spotify URIs for songs in the youtube playlists
+    
+    Parameters
+    ----------
+    youtube : object
+        The youtube object from the Youtube API
+    spc : object
+        The spotify object from the Spotify API
+    yt_playlistIDs : dict
+        The dictionary of playlist names and their IDs from youtube
+
+    Returns
+    -------
+    youtube_to_spotify_uri : dict
+        The dictionary of playlist names and their IDs from youtube
+        
+
     Example
     --------
+    >>> yt_playlistIDs = {
+        "playlist 1" : "id 1",
+        "playlist 2" : "id 2",
+        "playlist 3" : "id 3"
+    }
+
+    >>> youtube_to_spotify_uri = getYoutubeToSpotifySongIDs(youtube,spc,yt_playlistIDs)
+    
     youtube_to_spotify_uri = {
-        "playlist 1" : {
+    "playlist 1" : {
             "song 1" : "uri 1", 
             "song 2" : "uri 2",
             "song 3" : "uri 3"
@@ -22,11 +47,8 @@ def getYoutubeToSpotifySongIDs(youtube,spc,yt_playlistIDs) -> dict():
     youtube_to_spotifiy_uri = {} 
 
     # for each youtube playlist 
-    for chosen_playlist in yt_playlistIDs.keys():
-        playlist_name = chosen_playlist
-        st.subheader(f"Playlist: {playlist_name}")
-
-        playlist_songs = returnPlaylistItems(youtube,yt_playlistIDs[chosen_playlist])
+    for playlist_name in yt_playlistIDs.keys():
+        playlist_songs = returnPlaylistItems(youtube,yt_playlistIDs[playlist_name])
         
         # Initialising a list for each playlist
         youtube_to_spotifiy_uri[playlist_name] = []
@@ -49,7 +71,7 @@ def getYoutubeToSpotifySongIDs(youtube,spc,yt_playlistIDs) -> dict():
             status.update(label="Got all Info", state="complete",expanded=False)
             st.toast(f"Completed Playlist: {playlist_name}")
 
-        st.write(youtube_to_spotifiy_uri)
+        # st.write(youtube_to_spotifiy_uri)
     st.toast("Completed All")
 
     return youtube_to_spotifiy_uri
