@@ -1,13 +1,50 @@
+'''
+This file contains helper functions for the Spotify API
+-------------------------------------------
+
+Functions
+---------
+InitializeSpotify(client_id : str, client_secret : str, redirect_uri : str, openBrowser = True) -> object
+    Initializes the Spotify API
+StreamlitInitializeSpotifyAuth(client_id : str, client_secret : str, redirect_uri : str) -> object
+    Initializes the Spotify API for Streamlit
+getAuthLink(sp_oauth : object) -> str
+    Gets the authorization link for Spotify
+FinalzieAuth(sp_oauth : object,auth_code  : str) -> object
+    Finalizes the authorization for Spotify
+InitializeSpotifyClient(client_id : str, client_secret : str) -> object
+    Initializes the Spotify API for client credentials
+searchTrack(sp : object, track_name : str, explicit : bool = False) -> list()
+    Search for a track on Spotify
+'''
+
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 
 
-# Having issues with streamlit constantly opening tabs for some reason
+def InitializeSpotify(client_id : str, client_secret : str, redirect_uri : str, openBrowser = True) -> object:
+    '''
+    Initializes the Spotify API
+    Parameters
+    ----------
+    client_id : str
+        Client ID from Spotify
+    client_secret : str
+        Client Secret from Spotify
+    redirect_uri : str
+        Redirect URI from Spotify
+    openBrowser : bool, optional
+        Open the browser to authenticate, by default True
 
-# GOT THE ANSWER
-# ITS DUE TO playlist-modify-public, when tbhis is added to scope the app goes crazy 
-# playlist-read-private 
-def InitializeSpotify(client_id,client_secret,redirect_uri,openBrowser = True):
+    Returns
+    -------
+    sp : object
+        Spotify API object
+
+    Example
+    -------
+    >>> sp = InitializeSpotify(client_id,client_secret,redirect_uri)
+    '''
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id,
                                             client_secret=client_secret,
                                             redirect_uri=redirect_uri,
@@ -17,7 +54,28 @@ def InitializeSpotify(client_id,client_secret,redirect_uri,openBrowser = True):
     return sp
 
 # Im sorry for the naming schme here
-def StreamlitInitializeSpotifyAuth(client_id,client_secret,redirect_uri): 
+def StreamlitInitializeSpotifyAuth(client_id : str, client_secret : str, redirect_uri : str) -> object: 
+    '''
+    Initializes the Spotify API for Streamlit
+    
+    Parameters
+    ----------
+    client_id : str
+        Client ID from Spotify
+    client_secret : str
+        Client Secret from Spotify
+    redirect_uri : str  
+        Redirect URI from Spotify
+
+    Returns
+    -------
+    sp_oauth : object
+        Spotify API object
+
+    Example
+    -------
+    >>> sp_oauth = StreamlitInitializeSpotifyAuth(client_id,client_secret,redirect_uri)
+    '''
     sp_oauth = SpotifyOAuth(client_id=client_id,
                             client_secret=client_secret,
                             redirect_uri=redirect_uri,
@@ -25,26 +83,81 @@ def StreamlitInitializeSpotifyAuth(client_id,client_secret,redirect_uri):
                             open_browser=False)
     return sp_oauth
 
+def getAuthLink(sp_oauth : object) -> str:
+    '''
+    Gets the Authorization Link for Spotify
 
-def getAuthLink(sp_oauth):
-        auth_url = sp_oauth.get_authorize_url()
-        return auth_url
+    Parameters
+    ----------
+    sp_oauth : object
+        Spotify API object
+
+    Returns
+    -------
+    auth_url : str
+        Authorization URL
+
+    Example
+    -------
+    >>> auth_url = getAuthLink(sp_oauth)
+    >>> print(auth_url)
+    https://accounts.spotify.com/authorize?client_id=1234567890qwertyuiopasdfghjklzxcvbnm&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=playlist-modify-private+playlist-modify-public+playlist-read-private&state=123
+
+    '''
+    auth_url = sp_oauth.get_authorize_url()
+    return auth_url
     
-def FinalzieAuth(sp_oauth,auth_code):
+def FinalzieAuth(sp_oauth : object, auth_code : str) -> object:
+    '''
+    Finalizes the authorization for Spotify
+
+    Parameters
+    ----------
+    sp_oauth : object
+        Spotify API object
+    auth_code : str
+        Authorization Code
+
+    Returns
+    -------
+    sp : object
+        Spotify API object
+
+    Example
+    -------
+    >>> sp = FinalzieAuth(sp_oauth,auth_code)
+    '''
     token_info = sp_oauth.get_access_token(auth_code)
     sp = spotipy.Spotify(auth=token_info['access_token'])
     return sp
 
+def InitializeSpotifyClient(client_id : str, client_secret : str) -> object():
+    '''
+    Initializes the Spotify API for client credentials
 
-def InitializeSpotifyClient(client_id,client_secret):
+    Parameters
+    ----------
+    client_id : str
+        Client ID from Spotify
+    client_secret : str
+        Client Secret from Spotify
+
+    Returns
+    -------
+    spc : object
+        Spotify API object
+
+    Example
+    -------
+    >>> spc = InitializeSpotifyClient(client_id,client_secret)
+    '''
     # Authenticate using SpotifyOAuth
     spc = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=client_id,
                                                                 client_secret=client_secret
                                                                 ))
     return spc
-    
 
-def searchTrack(sp, track_name : str, explicit : bool = False) -> list():
+def searchTrack(sp : object, track_name : str, explicit : bool = False) -> list():
     '''
     Search for a track on Spotify
 

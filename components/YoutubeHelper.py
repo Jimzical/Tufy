@@ -1,3 +1,22 @@
+'''
+This Module contains all the functions required to interact with the Youtube API
+-------------------------------------------
+
+Functions
+---------
+InitializeYoutube() -> youtube : object
+    Initializes the Youtube API
+get_channel_id(youtube,channel_name : str) -> str
+    Get channel ID from channel name
+get_all_playlists(youtube, channel_id : str) -> list()
+    Get info on all the playlists created by a YouTube channel
+playlistInfo(youtube,playlist_id : str) -> dict()
+    Get all the info for a playlist
+returnPlaylistItems(youtube,playlistID : str) -> list()
+    Get all the songs in a playlist
+
+'''
+
 from googleapiclient.discovery import build
 from streamlit.runtime.caching import cache_data
 from streamlit import secrets
@@ -133,7 +152,7 @@ def get_all_playlists(youtube, channel_id : str) -> list():
 
 def playlistInfo(youtube,playlist_id : str) -> dict():
     '''
-    Get all playlists created by a YouTube channel
+    Get all the info for a playlist
 
     Parameters
     ----------
@@ -145,6 +164,7 @@ def playlistInfo(youtube,playlist_id : str) -> dict():
     Returns
     -------
     response : dict
+
         Response of the API call
 
     Examples
@@ -227,9 +247,7 @@ def playlistInfo(youtube,playlist_id : str) -> dict():
     
     return response
 
-
-# Not sure if this will work or not
-def returnPlaylistItems(youtube,chosen_playlist : str) -> list():
+def returnPlaylistItems(youtube,playlistID : str) -> list():
     '''
     Get all playlists created by a YouTube channel
 
@@ -237,7 +255,7 @@ def returnPlaylistItems(youtube,chosen_playlist : str) -> list():
     ----------
     youtube : object    
         YouTube API object
-    chosen_playlist : str
+    playlistID : str
         Playlist ID of the playlist
 
     Returns
@@ -255,7 +273,7 @@ def returnPlaylistItems(youtube,chosen_playlist : str) -> list():
     ]
     '''
     # Showing the songs in the playlist
-    response = playlistInfo(youtube,chosen_playlist)
+    response = playlistInfo(youtube,playlistID)
     res = response['items']
 
     playlist_items = []

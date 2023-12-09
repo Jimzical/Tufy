@@ -1,17 +1,31 @@
+'''
+-------------------------------------------
+Helper components for Streamlit
+-------------------------------------------
+This file contains all the helper components for streamlit
+
+Fucntions:
+    ColoredHeader() -> None
+        Creates a colored header with an optional description
+    Notif() -> None
+        Creates a notification for a few seconds
+        
+'''
 import streamlit as st
 from time import sleep
 
-def ColoredHeader(label : str = "Cool title",description : str = " ",color_name : str = "gold",help : str = "", description_help : str = "") -> None:
+def ColoredHeader(label : str ,description : str = " ",color_name : str = "gold",help : str = "", description_help : str = "" , anchor : bool = None) -> None:
     """
     -------------------------------------------
     Shows a header with a colored underline and an optional description.
     -------------------------------------------
     Parameters:
-        label (str): The title of the header. [Default: "Cool title"]
-        description (str): The description of the header. [Default: "Cool description"]
+        label (str): The title of the header. 
+        description (str): The description of the header. [Default: " "]
         color_name (str): The color of the underline. [Default: "gold"]
         help (str): The help text of the title. [Default: nothing]
         description_help (str): The help text of the description. [Default: nothing]
+        anchor (bool) : Show the anchor. [Default: None]
     
     Returns:
         None
@@ -24,6 +38,7 @@ def ColoredHeader(label : str = "Cool title",description : str = " ",color_name 
     st.title(
         body=label,
         help=help,
+        anchor=anchor
     )
     st.write(
         f'<hr style="background-color: {color_name}; margin-top: 0;'

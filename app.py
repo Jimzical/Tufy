@@ -1,21 +1,48 @@
+'''
+Version: 1.0.0
+Date: 9-12-2023
+
+Allows User to get all Playlists for a Channel given its Id or Name.
+
+
+Updates:
+    - Converts Youtube Playlist to Spotify Playlist
+Future updates:
+    - Put all functions in their respective files
+    - Clean up code
+    - Deploy Website
+Current Issues:
+    - Test Channel Name search
+    - Remove testMode
+    - Remove defalut user
+    - Error where if playlist doesnt exist, the button has to be clicked twice
+'''
 import streamlit as st
 from streamlit import secrets
 from googleapiclient.discovery import build
-from components.YoutubeHelper import *
-from components.YoutubeElements import *
-from components.SpotifyHelper import *
+from components.helper_components import ColoredHeader, Notif
+import components.YoutubeHelper as yh
+import components.YoutubeElements as ye
+import components.SpotifyHelper as sh
+import components.SpotifyElements as se
+import components.YoutubeToSpotify as yts
 
 def main(): 
-    st.title('Youtube Channel Information')
-    # Create a YouTube API object
-    youtube = InitializeYoutube()
+    ColoredHeader('Youtube Channel Information',anchor=False)
 
-    sp_oauth = StreamlitInitializeSpotifyAuth(
+
+    #  ----------------------------------------------------------------------
+    # ------------------------------ Authentication -------------------------
+    # ----------------------------------------------------------------------
+
+    # Create a YouTube API object
+    youtube = yh.InitializeYoutube()
+    sp_oauth = sh.StreamlitInitializeSpotifyAuth(
         client_id = secrets["spotify"]["client_id"],
         client_secret = secrets["spotify"]["client_secret"],
         redirect_uri = secrets["spotify"]["redirect_uri"]
     )
-    auth_url = getAuthLink(sp_oauth)
+    auth_url = sh.getAuthLink(sp_oauth)
     auth_link = st.empty()
     auth_link.markdown(f"Click [here]({auth_url}) to authorize the app.")
     try:
@@ -24,101 +51,91 @@ def main():
         st.info("Please Click the Link to Choose your Account")
         return
 
-    sp = FinalzieAuth(sp_oauth=sp_oauth,auth_code=auth_code)
+    sp = sh.FinalzieAuth(sp_oauth=sp_oauth,auth_code=auth_code)
    
     auth_link.empty()
 
-    spc = InitializeSpotifyClient(
+    spc = sh.InitializeSpotifyClient(
             client_id = secrets["spotify"]["client_id"],
             client_secret = secrets["spotify"]["client_secret"],
     )
-    tab1,tab2 = st.tabs(["Channel Id","Channel Name"])
-    try:
-        with tab1:
-            thru_id = throughChannelId(youtube)
-        with tab2:
-            thru_name = throughChannelName(youtube)
-       
-    except:
-        st.error("Invalid Channel Name")
-        return
-        
-    if thru_id:
-        channel_id = thru_id
-    elif thru_name:
-        channel_id = thru_name
+    
+    # ----------------------------------------------------------------------
+    # ------------------------------ Youtube -------------------------------
+    # ----------------------------------------------------------------------
 
-    # Get all playlists for that channel
+
+    yt_channel_id = ye.chooseChannel(youtube)
+
+    # Get all yt_channel_playlists for that channel
     try:
-        playlists = get_all_playlists(youtube, channel_id)
+        yt_channel_playlists = yh.get_all_playlists(youtube, yt_channel_id)
     except:
         st.error("No Playlists Found")
         return
 
-    chosen_playlist_options = choosePlaylist(playlists, testMode=True)
+    yt_chosen_playlistIDs = ye.choosePlaylist(yt_channel_playlists, testMode=False)
 
-    cleaned_playlists = {}
-    for playlist in playlists:
-        cleaned_playlists[playlist['ID']] = playlist['Title']
+    # Youtube Display Stuff
+    if st.toggle("Display Youtube Results"):
+        # stuff = st.contr
+        with st.container(border=True):
+            ye.displayPlaylistItems(youtube,yt_chosen_playlistIDs) 
 
-    toggle_youtube_display = st.toggle('Display Playlist Items')
-    if toggle_youtube_display:
-        total_songs = 0
-        for chosen_playlist in chosen_playlist_options:
-            with st.status(f"Gettting Info for {cleaned_playlists[chosen_playlist]}",expanded=True) as status:
-                st.subheader(f"Playlist: {cleaned_playlists[chosen_playlist]}")
-                playlist_songs = returnPlaylistItems(youtube,chosen_playlist)
-                st.write(playlist_songs)
-                st.write(len(playlist_songs))
-                total_songs += len(playlist_songs)
-            status.update(label="Got all Info", state="complete",expanded=True)
-        st.title(f"`Total Number of Songs ➡️ {total_songs}`")
-    toggle_spotify_display = st.toggle("Display Spotify Results")
-    if toggle_spotify_display:
-        st.title("Getting the Spotify URIs")
-        track_details = {}
-        for chosen_playlist in chosen_playlist_options:
-            st.subheader(f"Playlist: {cleaned_playlists[chosen_playlist]}")
-            track_details[cleaned_playlists[chosen_playlist]] = {}
-            playlist_songs = returnPlaylistItems(youtube,chosen_playlist)
+    # ----------------------------------------------------------------------
+    # ------------------------------ Spotify -------------------------------
+    # ----------------------------------------------------------------------
 
-            counter = 0
-            with st.status(f"Gettting Info for {cleaned_playlists[chosen_playlist]}",expanded=True) as status:
-                for song in playlist_songs:
-                    track_list = searchTrack(spc, song)
-                    
-                    track_details[cleaned_playlists[chosen_playlist]][track_list["track_name"]] = track_list["track_id"]
-                    
-                    counter = counter + 1
-                    st.markdown(f"{counter}: {track_list['track_name']} ->  https://open.spotify.com/track/{track_list['track_id']}")
-                status.update(label="Got all Info", state="complete",expanded=False)
-                st.toast(f"Completed Playlist: {cleaned_playlists[chosen_playlist]}")
-        st.toast("Completed All")
+    # # Spotify Stuff
+    # toggle_spotify_display = st.toggle("Display Spotify Results")
+    # if toggle_spotify_display:
+    #     yt_to_sp_songIDs = se.getYoutubeToSpotifySongIDs(youtube,spc,yt_chosen_playlistIDs)
+    
 
     with st.sidebar:
+        ColoredHeader("Start Creating Playlist!")
         me = sp.current_user()
-        st.write(me)
 
-        # Get current user's playlists
-        user_playlists = sp.current_user_playlists()
-        # user_playlists_name_list = [playlist["name"] for playlist in user_playlists["items"]]
-        user_playlists_name_list = [playlist["name"].lower().strip() for playlist in user_playlists["items"]]
+        # Get current user's yt_channel_playlists
+        sp_user_playlists = sp.current_user_playlists()
+        
+        sp_userPlaylistsName_list = [sp_playlist["name"] for sp_playlist in sp_user_playlists["items"]]
+        sp_userPlaylist_to_uri_dict = {sp_playlist["name"]: sp_playlist["id"] for sp_playlist in sp_user_playlists["items"]}
+    
+        sp_add_songs = st.button("Add Songs",help="Add songs to your Spotify Playlist",use_container_width=True)
+        if sp_add_songs:
+            # CREATING PLAYLIST IF THEY DONT EXIST
+            for playlist_name in yt_chosen_playlistIDs.keys():
 
-        st.subheader("user_playlists_name_list")
-        st.write(user_playlists_name_list)
+                # if exists, skip
+                if playlist_name in sp_userPlaylistsName_list:
+                    st.toast(f"Playlist {playlist_name} already exists")
+                else:
+                    sp.user_playlist_create(
+                        user=me["id"],
+                        name=playlist_name
+                    )
+                    st.toast(f"Added Spotify Playlist called {playlist_name}")
+            
+            Notif(message = "Created all Necessary Playlist!")
 
-        for chosen_playlist in chosen_playlist_options:
-            # if not exist in account lib add
-            if cleaned_playlists[chosen_playlist].strip().lower() in user_playlists_name_list:
-                break
+            # GETTING SPOTIFY URIs
+            with st.status("Getting Spotify URIs",expanded=False) as status:
+                st.caption("This may take a while...")
+                yt_sp_songURIs = yts.getYoutubeToSpotifySongIDs(youtube,spc,yt_chosen_playlistIDs)
+                status.update(label="Got all Info", state="complete",expanded=False)
 
-            sp.user_playlist_create(
-                user=me["id"],
-                name=cleaned_playlists[chosen_playlist]
-            )
-            st.toast(f"Added Spotify Playlist called {cleaned_playlists[chosen_playlist]}")
-        st.toast("Created all Necessary Playlist!")
 
+            # ADDING SONGS TO PLAYLIST    
+            with st.status("Adding Songs",expanded=True) as status:
+                for playlist_name in yt_chosen_playlistIDs:
+                    st.write(f"Adding songs to `{playlist_name}` playlist")
+                    sp.playlist_add_items(
+                        playlist_id=sp_userPlaylist_to_uri_dict[playlist_name],
+                        items=yt_sp_songURIs[playlist_name]
+                    )                    
+
+                status.update(label="Added Songs", state="complete",expanded=False)
 
 if __name__ == '__main__':
     main()
