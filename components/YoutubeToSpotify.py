@@ -1,19 +1,16 @@
 import streamlit as st
-from streamlit import secrets
+import concurrent.futures
 from googleapiclient.discovery import build
-from components.HelperComponents import ColoredHeader, Notif
 import components.YoutubeHelper as yh
-import components.YoutubeElements as ye
 import components.SpotifyHelper as sh
-import components.SpotifyElements as se
 
 def Authentication() -> dict():
     # Create a YouTube API object
-    youtube = yh.InitializeYoutube()
+    youtube = yh.InitializeYoutube(st.secrets["youtube"]["api_key"])
     sp_oauth = sh.StreamlitInitializeSpotifyAuth(
-        client_id = secrets["spotify"]["client_id"],
-        client_secret = secrets["spotify"]["client_secret"],
-        redirect_uri = secrets["spotify"]["redirect_uri"]
+        client_id = st.secrets["spotify"]["client_id"],
+        client_secret = st.secrets["spotify"]["client_secret"],
+        redirect_uri = st.secrets["spotify"]["redirect_uri"]
     )
     auth_url = sh.getAuthLink(sp_oauth)
     auth_link = st.empty()
@@ -29,8 +26,8 @@ def Authentication() -> dict():
     auth_link.empty()
 
     spc = sh.InitializeSpotifyClient(
-            client_id = secrets["spotify"]["client_id"],
-            client_secret = secrets["spotify"]["client_secret"],
+            client_id = st.secrets["spotify"]["client_id"],
+            client_secret = st.secrets["spotify"]["client_secret"],
     )
 
     items = {
@@ -41,23 +38,24 @@ def Authentication() -> dict():
 
     return items
 
-def getYoutubeToSpotifySongIDs(youtube : object, spc : object, yt_playlistIDs : dict) -> dict():
+@st.cache_resource()
+def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs : dict) -> dict():
     '''
-    Get the Spotify URIs for songs in the youtube playlists
+    Get the Spotify URIs for songs in the _youtube playlists
         
     Parameters
     ----------
-    youtube : object
-        The youtube object from the Youtube API
-    spc : object
+    _youtube : object
+        The _youtube object from the _Youtube API
+    _spc : object
         The spotify object from the Spotify API
     yt_playlistIDs : dict
-        The dictionary of playlist names and their IDs from youtube
+        The dictionary of playlist names and their IDs from _youtube
 
     Returns
     -------
     youtube_to_spotify_uri : dict
-        The dictionary of playlist names and their IDs from youtube
+        The dictionary of playlist names and their IDs from _youtube
         
 
     Example
@@ -68,7 +66,7 @@ def getYoutubeToSpotifySongIDs(youtube : object, spc : object, yt_playlistIDs : 
         "playlist 3" : "id 3"
     }
 
-    >>> youtube_to_spotify_uri = getYoutubeToSpotifySongIDs(youtube,spc,yt_playlistIDs)
+    >>> youtube_to_spotify_uri = getYoutubeToSpotifySongIDs(_youtube,_spc,yt_playlistIDs)
     
     youtube_to_spotify_uri = {
         "playlist 1" : ["URI 1","URI 2","URI 3"],
@@ -77,19 +75,50 @@ def getYoutubeToSpotifySongIDs(youtube : object, spc : object, yt_playlistIDs : 
     }
     '''
     youtube_to_spotifiy_uri = {} 
-    # for each youtube playlist 
+    # for each _youtube playlist 
     for playlist_name in yt_playlistIDs.keys():
-        playlist_songs = yh.returnPlaylistItems(youtube,yt_playlistIDs[playlist_name])
+        playlist_songs = yh.returnPlaylistItems(_youtube,yt_playlistIDs[playlist_name])
 
         # Initialising a list for each playlist
         youtube_to_spotifiy_uri[playlist_name] = []
 
         for song in playlist_songs:
             # getting songID data for spotify
-            song_data = sh.searchTrack(spc, song)
+            song_data = sh.searchTrack(_spc, song)
 
             # # appeding {name : id} to the list of songs to the list with the key as playlist name in this main dict 
             # youtube_to_spotifiy_uri[playlist_name].append({song_data['track_name'] : song_data['track_id']})
             youtube_to_spotifiy_uri[playlist_name].append(song_data['track_id'])
 
     return youtube_to_spotifiy_uri
+
+# Function to get Spotify URIs for a playlist
+def get_playlist_uris(youtube, spc, playlist_name, playlist_id):
+    playlist_songs = yh.returnPlaylistItems(youtube, playlist_id)
+    uri_list = []
+
+    for song in playlist_songs:
+        song_data = sh.searchTrack(spc, song)
+        uri_list.append(song_data['track_id'])
+
+    return playlist_name, uri_list
+
+# Function to get all Spotify URIs using multithreading
+@st.cache_resource()
+def get_youtube_to_spotify_song_ids(_youtube, _spc, yt_playlist_ids):
+    youtube_to_spotify_uri = {}
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Submit tasks for each playlist
+        future_to_playlist = {executor.submit(get_playlist_uris, _youtube, _spc, playlist_name, playlist_id): playlist_name
+                              for playlist_name, playlist_id in yt_playlist_ids.items()}
+
+        for future in concurrent.futures.as_completed(future_to_playlist):
+            playlist_name = future_to_playlist[future]
+            try:
+                result = future.result()
+                youtube_to_spotify_uri[result[0]] = result[1]
+            except Exception as e:
+                st.error(f"An error occurred while processing playlist {playlist_name}: {str(e)}")
+
+    return youtube_to_spotify_uri

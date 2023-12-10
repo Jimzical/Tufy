@@ -122,28 +122,59 @@ def SpotifyIntegration(youtube : object,sp : object, spc : object, yt_chosen_pla
             if playlist_name in sp_userPlaylistsName_list:
                 st.toast(f"Playlist {playlist_name} already exists")
             else:
-                sp.user_playlist_create(
+                new_playlist = sp.user_playlist_create(
                     user=me["id"],
                     name=playlist_name
                 )
+                sp_userPlaylist_to_uri_dict[playlist_name] = new_playlist["uri"]
                 st.toast(f"Added Spotify Playlist called {playlist_name}")
         
-        Notif(message = "Created all Necessary Playlist!")
+        # Notif(message = "Created all Necessary Playlist!")
+        st.toast("Created all Necessary Playlist!")
 
-        # GETTING SPOTIFY URIs
-        with st.status("Getting Spotify URIs",expanded=False) as status:
-            st.caption("This may take a while...")
-            yt_sp_songURIs = yts.getYoutubeToSpotifySongIDs(youtube,spc,yt_chosen_playlistIDs)
-            status.update(label="Got all Info", state="complete",expanded=False)
+        try:
+            # GETTING SPOTIFY URIs
+            with st.status("Getting Spotify URIs", expanded=False) as status:
+                st.caption("This may take a while...")
+                yt_sp_songURIs = yts.get_youtube_to_spotify_song_ids(youtube, spc, yt_chosen_playlistIDs)
+                st.write(yt_sp_songURIs)
+                status.update(label="Got all Info", state="complete", expanded=False)
+        except:
+            st.error("Error in getting Spotify URIs")
+            st.stop()
+        
+        try:
+            # ADDING SONGS TO PLAYLIST    
+            with st.status("Adding Songs",expanded=True) as status:
+                for playlist_name in yt_chosen_playlistIDs:
+                    st.write(f"Adding songs to `{playlist_name}` playlist")
 
+                    # get the list of songs in the spotify playlist
+                    sp_playlist_songs = sp.playlist_items(sp_userPlaylist_to_uri_dict[playlist_name])
 
-        # ADDING SONGS TO PLAYLIST    
-        with st.status("Adding Songs",expanded=True) as status:
-            for playlist_name in yt_chosen_playlistIDs:
-                st.write(f"Adding songs to `{playlist_name}` playlist")
-                sp.playlist_add_items(
-                    playlist_id=sp_userPlaylist_to_uri_dict[playlist_name],
-                    items=yt_sp_songURIs[playlist_name]
-                )                    
+                    # Check if there are any songs in the playlist
+                    if len(sp_playlist_songs["items"]) == 0:
+                        st.toast(f"INFO: No songs in playlist {playlist_name} currently")
+                    else:    
+                        lastSong = sp_playlist_songs["items"][-1]
+                        # get index in yt_sp_songURIs where the last song in the spotify playlist is sp_playlist_songs["items"][-1]["track"]["id"]
+                        for index in range(len(yt_sp_songURIs[playlist_name])):
+                            if yt_sp_songURIs[playlist_name][index] == lastSong["track"]["id"]:
+                                break
+                        
+                        if index == len(yt_sp_songURIs[playlist_name]) - 1:
+                            st.toast(f"No new songs to add to {playlist_name}")
+                            continue
+                        else:
+                            # Update the list of songs to add to the playlist to only include songs after the last song in the playlist
+                            yt_sp_songURIs[playlist_name] = yt_sp_songURIs[playlist_name][index+1:]
+                    
+                    sp.playlist_add_items(
+                        playlist_id=sp_userPlaylist_to_uri_dict[playlist_name],
+                        items=yt_sp_songURIs[playlist_name]
+                    )                    
 
-            status.update(label="Added Songs", state="complete",expanded=False)
+                status.update(label="Added Songs", state="complete",expanded=True)
+        except:
+            st.error("Error in adding songs")
+            st.stop()

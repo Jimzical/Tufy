@@ -18,26 +18,8 @@ returnPlaylistItems(youtube,playlistID : str) -> list()
 '''
 
 from googleapiclient.discovery import build
-from streamlit.runtime.caching import cache_data
-from streamlit import secrets
-'''
-This Module contains all the functions required to interact with the Youtube API
 
-Functions
----------
-InitializeYoutube()
-    Initializes the Youtube API
-get_channel_id(youtube,channel_name : str) -> str
-    Get channel ID from channel name
-get_all_playlists(youtube, channel_id : str) -> list()
-    Get all playlists created by a YouTube channel
-playlistInfo(youtube,playlist_id : str) -> dict()
-    Get all playlists created by a YouTube channel
-'''
-
-
-@cache_data
-def InitializeYoutube() -> object:
+def InitializeYoutube(api_key : str) -> object:
     '''
     Initializes the Youtube API
 
@@ -46,7 +28,6 @@ def InitializeYoutube() -> object:
     youtube : object
         Youtube API object
     '''
-    api_key = secrets['youtube']['api_key']
     youtube = build('youtube', 'v3', developerKey=api_key)
     
     return youtube
