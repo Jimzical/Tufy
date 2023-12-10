@@ -1,16 +1,20 @@
 '''
-Version: 1.2.1
+Version: 1.3.1
 Date: 9-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
 
 
 Updates:
-    - Cleaned up code
-    - Put all functions in their respective files
-    - Fixed the Error where button needed to be double clicked to work
+    - Playlist Search is now cached
+    - Feature that checks last song in playlist and only adds songs after that
 Future updates:
+    - Maybe use multithreading in sh to make searchTracks faster (maybe using mulitple ports or smthn)    
     - Deploy Website
+    - Maybe upgrade the append-song feature to find the last common song intead of just checking the last song    
+Current Issues:
+    - Need to add a try execept to searchTrach sidebar status element to catch errors   
+
 '''
 import streamlit as st
 from streamlit import secrets
@@ -29,9 +33,7 @@ def main():
     
     try:
         items = yts.Authentication()
-        youtube = items["youtube"]
-        sp = items["spotify"]
-        spc = items["spotify_no_auth"]
+        youtube,sp,spc = items["youtube"], items["spotify"], items["spotify_no_auth"]
     except:
         st.stop()   
 

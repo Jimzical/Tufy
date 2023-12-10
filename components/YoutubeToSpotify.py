@@ -38,23 +38,24 @@ def Authentication() -> dict():
 
     return items
 
-def getYoutubeToSpotifySongIDs(youtube : object, spc : object, yt_playlistIDs : dict) -> dict():
+@st.cache_resource()
+def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs : dict) -> dict():
     '''
-    Get the Spotify URIs for songs in the youtube playlists
+    Get the Spotify URIs for songs in the _youtube playlists
         
     Parameters
     ----------
-    youtube : object
-        The youtube object from the Youtube API
-    spc : object
+    _youtube : object
+        The _youtube object from the _Youtube API
+    _spc : object
         The spotify object from the Spotify API
     yt_playlistIDs : dict
-        The dictionary of playlist names and their IDs from youtube
+        The dictionary of playlist names and their IDs from _youtube
 
     Returns
     -------
     youtube_to_spotify_uri : dict
-        The dictionary of playlist names and their IDs from youtube
+        The dictionary of playlist names and their IDs from _youtube
         
 
     Example
@@ -65,7 +66,7 @@ def getYoutubeToSpotifySongIDs(youtube : object, spc : object, yt_playlistIDs : 
         "playlist 3" : "id 3"
     }
 
-    >>> youtube_to_spotify_uri = getYoutubeToSpotifySongIDs(youtube,spc,yt_playlistIDs)
+    >>> youtube_to_spotify_uri = getYoutubeToSpotifySongIDs(_youtube,_spc,yt_playlistIDs)
     
     youtube_to_spotify_uri = {
         "playlist 1" : ["URI 1","URI 2","URI 3"],
@@ -74,16 +75,16 @@ def getYoutubeToSpotifySongIDs(youtube : object, spc : object, yt_playlistIDs : 
     }
     '''
     youtube_to_spotifiy_uri = {} 
-    # for each youtube playlist 
+    # for each _youtube playlist 
     for playlist_name in yt_playlistIDs.keys():
-        playlist_songs = yh.returnPlaylistItems(youtube,yt_playlistIDs[playlist_name])
+        playlist_songs = yh.returnPlaylistItems(_youtube,yt_playlistIDs[playlist_name])
 
         # Initialising a list for each playlist
         youtube_to_spotifiy_uri[playlist_name] = []
 
         for song in playlist_songs:
             # getting songID data for spotify
-            song_data = sh.searchTrack(spc, song)
+            song_data = sh.searchTrack(_spc, song)
 
             # # appeding {name : id} to the list of songs to the list with the key as playlist name in this main dict 
             # youtube_to_spotifiy_uri[playlist_name].append({song_data['track_name'] : song_data['track_id']})

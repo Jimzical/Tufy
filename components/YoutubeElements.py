@@ -25,7 +25,7 @@ def throughChannelId(youtube : object) -> str:
     channel_id = st.text_input('Enter Channel ID', value='UCPKlrgZXnnb89nSeITvTdGA')
     # channel_id = st.text_input('Enter Channel ID', value='UCEXnhgo3qEjrlkDvljtf5xg')
 
-    # using regex to check if the channel ID is valid. it can either be UCEXnhgo3qEjrlkDvljtf5xg format or https://www.youtube.com/channel/UCEXnhgo3qEjrlkDvljtf5xg format
+    # using regex to check if the channel ID is valid. it can either be UCPKlrgZXnnb89nSeITvTdGA format or https://www.youtube.com/channel/UCPKlrgZXnnb89nSeITvTdGA format
     if re.match(r'UC[A-Za-z0-9_-]{22}', channel_id):
         st.caption(f"https://www.youtube.com/channel/{channel_id}",help = "You Can Click the Link to Verify the Channel")
         return channel_id
@@ -160,10 +160,15 @@ def displayPlaylistItems(youtube : object, yt_chosen_playlistIDs : dict) -> None
             with st.expander(i['snippet']['title'],expanded=False):
                 col1,col2,col3 = st.columns([1.5,2,2])
                 # col1.markdown(f'<img src="{i["snippet"]["thumbnails"]["default"]["url"]}" alt="Thumbnail" style="max-width:100%;">', unsafe_allow_html=True)
-                col1.image(i['snippet']['thumbnails']['default']['url'], use_column_width=True)
+                try:
+                    col1.image(i['snippet']['thumbnails']['default']['url'], use_column_width=True)
+                except:
+                    col1.info("No Thumbnail")
                 col2.write(f"{i['snippet']['title']}")
-                col3.write(f"by  {i['snippet']['videoOwnerChannelTitle']}")
-
+                try:
+                    col3.write(f"by  {i['snippet']['videoOwnerChannelTitle']}")
+                except:
+                    col3.info("No Channel Name")
 # Was a test feature
 def toggleDisplayPlaylistItems(youtube : object, chosen_playlistIDs : dict) -> None:
     '''
@@ -261,6 +266,5 @@ def youtubeDisplayElements(youtube, yt_chosen_playlistIDs : dict) -> None:
     >>> youtubeDisplayElements(youtube, yt_playlistIDs)
     '''
     if st.toggle("Display Youtube Results"):
-        # stuff = st.contr
         with st.container(border=True):
             displayPlaylistItems(youtube,yt_chosen_playlistIDs) 

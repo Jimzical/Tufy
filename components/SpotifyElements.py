@@ -130,22 +130,55 @@ def SpotifyIntegration(youtube : object,sp : object, spc : object, yt_chosen_pla
                 sp_userPlaylist_to_uri_dict[playlist_name] = new_playlist["uri"]
                 st.toast(f"Added Spotify Playlist called {playlist_name}")
         
-        Notif(message = "Created all Necessary Playlist!")
+        # Notif(message = "Created all Necessary Playlist!")
+        st.toast("Created all Necessary Playlist!")
 
         # GETTING SPOTIFY URIs
         with st.status("Getting Spotify URIs",expanded=False) as status:
             st.caption("This may take a while...")
             yt_sp_songURIs = yts.getYoutubeToSpotifySongIDs(youtube,spc,yt_chosen_playlistIDs)
+            st.write(yt_sp_songURIs)
             status.update(label="Got all Info", state="complete",expanded=False)
 
-
+        # TODO: Uncomment this to add songs to playlist (only for testing rn)
         # ADDING SONGS TO PLAYLIST    
         with st.status("Adding Songs",expanded=True) as status:
             for playlist_name in yt_chosen_playlistIDs:
                 st.write(f"Adding songs to `{playlist_name}` playlist")
+
+                # get the list of songs in the spotify playlist
+                sp_playlist_songs = sp.playlist_items(sp_userPlaylist_to_uri_dict[playlist_name])
+
+                # Check if there are any songs in the playlist
+                if len(sp_playlist_songs["items"]) == 0:
+                    st.toast(f"No songs in playlist {playlist_name}")
+                    continue
+                else:    
+                    lastSong = sp_playlist_songs["items"][-1]
+                    # TODO: Remove this
+                    # st.write(f"Last Song: {lastSong['track']['name']} -> {lastSong['track']['id']}")
+
+                    # get index in yt_sp_songURIs where the last song in the spotify playlist is sp_playlist_songs["items"][-1]["track"]["id"]
+                    for index in range(len(yt_sp_songURIs[playlist_name])):
+                        if yt_sp_songURIs[playlist_name][index] == lastSong["track"]["id"]:
+                            break
+                    
+                    # TODO: Remove this
+                    # st.write(f"LastSongIndex: {index} , Length: {len(yt_sp_songURIs[playlist_name])}")
+                    
+                    if index == len(yt_sp_songURIs[playlist_name]) - 1:
+                        st.toast(f"No new songs to add to {playlist_name}")
+                        continue
+                    else:
+                        # Update the list of songs to add to the playlist to only include songs after the last song in the playlist
+                        yt_sp_songURIs[playlist_name] = yt_sp_songURIs[playlist_name][index+1:]
+                        # TODO: Remove this
+                        # st.write(f"New List: {yt_sp_songURIs[playlist_name]}")
+                
+                
                 sp.playlist_add_items(
                     playlist_id=sp_userPlaylist_to_uri_dict[playlist_name],
                     items=yt_sp_songURIs[playlist_name]
                 )                    
 
-            status.update(label="Added Songs", state="complete",expanded=False)
+            status.update(label="Added Songs", state="complete",expanded=True)
