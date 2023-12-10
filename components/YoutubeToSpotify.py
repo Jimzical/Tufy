@@ -1,16 +1,16 @@
 import streamlit as st
-from streamlit import secrets
+import concurrent.futures
 from googleapiclient.discovery import build
 import components.YoutubeHelper as yh
 import components.SpotifyHelper as sh
 
 def Authentication() -> dict():
     # Create a YouTube API object
-    youtube = yh.InitializeYoutube(secrets["youtube"]["api_key"])
+    youtube = yh.InitializeYoutube(st.secrets["youtube"]["api_key"])
     sp_oauth = sh.StreamlitInitializeSpotifyAuth(
-        client_id = secrets["spotify"]["client_id"],
-        client_secret = secrets["spotify"]["client_secret"],
-        redirect_uri = secrets["spotify"]["redirect_uri"]
+        client_id = st.secrets["spotify"]["client_id"],
+        client_secret = st.secrets["spotify"]["client_secret"],
+        redirect_uri = st.secrets["spotify"]["redirect_uri"]
     )
     auth_url = sh.getAuthLink(sp_oauth)
     auth_link = st.empty()
@@ -26,8 +26,8 @@ def Authentication() -> dict():
     auth_link.empty()
 
     spc = sh.InitializeSpotifyClient(
-            client_id = secrets["spotify"]["client_id"],
-            client_secret = secrets["spotify"]["client_secret"],
+            client_id = st.secrets["spotify"]["client_id"],
+            client_secret = st.secrets["spotify"]["client_secret"],
     )
 
     items = {
@@ -91,3 +91,34 @@ def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs 
             youtube_to_spotifiy_uri[playlist_name].append(song_data['track_id'])
 
     return youtube_to_spotifiy_uri
+
+# Function to get Spotify URIs for a playlist
+def get_playlist_uris(youtube, spc, playlist_name, playlist_id):
+    playlist_songs = yh.returnPlaylistItems(youtube, playlist_id)
+    uri_list = []
+
+    for song in playlist_songs:
+        song_data = sh.searchTrack(spc, song)
+        uri_list.append(song_data['track_id'])
+
+    return playlist_name, uri_list
+
+# Function to get all Spotify URIs using multithreading
+@st.cache_resource()
+def get_youtube_to_spotify_song_ids(_youtube, _spc, yt_playlist_ids):
+    youtube_to_spotify_uri = {}
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Submit tasks for each playlist
+        future_to_playlist = {executor.submit(get_playlist_uris, _youtube, _spc, playlist_name, playlist_id): playlist_name
+                              for playlist_name, playlist_id in yt_playlist_ids.items()}
+
+        for future in concurrent.futures.as_completed(future_to_playlist):
+            playlist_name = future_to_playlist[future]
+            try:
+                result = future.result()
+                youtube_to_spotify_uri[result[0]] = result[1]
+            except Exception as e:
+                st.error(f"An error occurred while processing playlist {playlist_name}: {str(e)}")
+
+    return youtube_to_spotify_uri
