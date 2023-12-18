@@ -20,8 +20,6 @@ Current Issues:
     - Rename that function to match the other functions
 '''
 import streamlit as st
-from streamlit import secrets
-from googleapiclient.discovery import build
 import components.HelperComponents as hc
 import components.YoutubeHelper as yh
 import components.YoutubeElements as ye
