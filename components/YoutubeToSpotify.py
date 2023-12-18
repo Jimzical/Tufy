@@ -94,6 +94,38 @@ def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs 
 
 # Function to get Spotify URIs for a playlist
 def get_playlist_uris(youtube, spc, playlist_name, playlist_id):
+    '''
+    Get the Spotify URIs for songs in the youtube playlists
+
+    Parameters
+    ----------
+    youtube : object
+        The youtube object from the Youtube API
+    spc : object
+        The spotify object from the Spotify API
+    playlist_name : str
+        Name of the playlist
+    playlist_id : str
+        ID of the playlist  
+
+    Returns
+    -------
+    playlist_name : str
+        Name of the playlist
+    uri_list : list
+        List of Spotify URIs for the songs in the playlist
+
+    Example
+    --------
+    >>> playlist_name, uri_list = get_playlist_uris(youtube, spc, playlist_name, playlist_id)
+
+    >>> playlist_name
+    'Playlist 1'
+
+    >>> uri_list
+    ['URI 1','URI 2','URI 3']
+
+    '''
     playlist_songs = yh.returnPlaylistItems(youtube, playlist_id)
     uri_list = []
 
