@@ -11,7 +11,8 @@ Updates:
 Future updates:
     - Add a Checkbox right next to the multiselect to select all
     - Deploy Website
-    - Maybe upgrade the append-song feature to find the last common song intead of just checking the last song    
+    - Maybe upgrade the append-song feature to find the last common song intead of just checking the last song
+        - CAN USE SETS TO DO THIS   
 Current Issues:
     - MAJOR: songs seem repeat, might be a cache issue or seach issue [ FOUND: when trying the ........ playlist]
         POSSIBLE SOLUTION: replace with no multithreading function and check
