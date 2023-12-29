@@ -39,7 +39,7 @@ def Authentication() -> dict():
 
 # Function to get all the playlists from a channel wihtout multithreading
 # @st.cache_resource()
-def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs : dict) -> dict():
+def getYoutubeToSpotifySongIDs(_youtube: object, _spc: object, yt_playlistIDs: dict, streamlitMode=False) -> dict:
     '''
     Get the Spotify URIs for songs in the _youtube playlists
         
@@ -77,21 +77,33 @@ def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs 
     youtube_to_spotifiy_uri = {} 
     # for each _youtube playlist 
     for playlist_name in yt_playlistIDs.keys():
-        playlist_songs = yh.returnPlaylistItems(_youtube,yt_playlistIDs[playlist_name])
+        playlist_songs = yh.returnPlaylistItems(_youtube, yt_playlistIDs[playlist_name])
 
-        # Initialising a list for each playlist
+        # Initializing a list for each playlist
         youtube_to_spotifiy_uri[playlist_name] = []
 
-        for song in playlist_songs:
+        progress_bar = st.progress(0)  # Create a progress bar
+
+        for i, song in enumerate(playlist_songs):
             # getting songID data for spotify
             song_data = sh.searchTrack(_spc, song)
 
-            # # appeding {name : id} to the list of songs to the list with the key as playlist name in this main dict 
-            # youtube_to_spotifiy_uri[playlist_name].append({song_data['track_name'] : song_data['track_id']})
+            if streamlitMode:
+                st.write(playlist_name)
+
+            # Append song_id to the list with the key as playlist name in this main dict 
             youtube_to_spotifiy_uri[playlist_name].append(song_data['track_id'])
 
-    return youtube_to_spotifiy_uri
+            # Update the progress bar
+            progress_percent = (i + 1) / len(playlist_songs)
+            progress_bar.progress(progress_percent)
 
+        # Show the final progress as 100%
+        progress_bar.progress(1.0)
+
+    # Print the resulting dictionary
+    st.write(youtube_to_spotifiy_uri) 
+    return youtube_to_spotifiy_uri
 # Function to get Spotify URIs for a playlist
 def get_playlist_uris(youtube, spc, playlist_name, playlist_id):
     '''

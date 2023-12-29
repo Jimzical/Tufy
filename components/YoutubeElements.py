@@ -37,7 +37,7 @@ def chooseChannel() -> str:
         raise ValueError("Invalid Channel ID")
     
 
-def choosePlaylist(playlists : list, testMode = False) -> dict:
+def choosePlaylist(playlists : list) -> dict:
     '''
     Create Streamlit UI to choose multiple playlist
 
@@ -55,7 +55,7 @@ def choosePlaylist(playlists : list, testMode = False) -> dict:
 
     Examples
     --------
-    >>> yt_playlistIDs = choosePlaylist(playlists, testMode = False)
+    >>> yt_playlistIDs = choosePlaylist(playlists)
     {
         "playlist_title 1" : "playlist_id 1",
         "playlist_title 2" : "playlist_id 2",
@@ -68,10 +68,7 @@ def choosePlaylist(playlists : list, testMode = False) -> dict:
         title_id_mapping[playlist['Title']] = playlist['ID']
 
     # Choosing the playlist
-    if testMode:
-        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=["Loop"])
-    else:
-        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys())[-1])
+    selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys())[-1])
 
     playlistID_dict = {}
     # for all the selected playlists, get the playlist ID
@@ -155,7 +152,7 @@ def youtubeData(youtube : object) -> None:
         st.error("No Playlists Found")
         return
 
-    yt_chosen_playlistIDs = choosePlaylist(yt_channel_playlists, testMode=False)
+    yt_chosen_playlistIDs = choosePlaylist(yt_channel_playlists)
 
     return yt_chosen_playlistIDs
 
