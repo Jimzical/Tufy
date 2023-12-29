@@ -1,16 +1,14 @@
 '''
-Version: 1.5.0
+Version: 1.6.0
 Date: 9-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
 
 
 Updates:
-    - Used sets to remove any duplicates being added to spotify playlists
-    - testMode removed from YoutubeElements.py
-    - Added a Progres Bar to show Progress
+    - Changed some Default values
+    - Added a Feature to Directly add Playlist instead of through Channels
 Future updates:
-    - Add a feature to Directly add playlist insteam of channel
     - Deploy Website
 Current Issues:
 '''

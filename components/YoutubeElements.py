@@ -12,14 +12,14 @@ import re
 # It was done this way when you could use the channel name to get the channel ID as well however since that functionality is no longer available, this function is redundant but i wont fix it yet
 def chooseChannel() -> str:
     '''
-    Create the Streamlit UI to get the channel ID
+    Create the Streamlit text_input UI to get the channel ID
 
     Returns
     -------
     channel_id : str
         Channel ID of the channel
     '''
-    channel_id = st.text_input('Enter Channel ID', value='UCPKlrgZXnnb89nSeITvTdGA')
+    channel_id = st.text_input('Enter Channel ID', value='UCXKSbzihU5cu0U4qbbjB3GA')
     # channel_id = st.text_input('Enter Channel ID', value='UCEXnhgo3qEjrlkDvljtf5xg')
 
     # using regex to check if the channel ID is valid. it can either be UCPKlrgZXnnb89nSeITvTdGA format or https://www.youtube.com/channel/UCPKlrgZXnnb89nSeITvTdGA format
@@ -119,6 +119,7 @@ def displayPlaylistItems(youtube : object, yt_chosen_playlistIDs : dict) -> None
                 except:
                     col3.info("No Channel Name")
 
+
 def youtubeData(youtube : object) -> None:
     '''
     Create Streamlit UI to get the Youtube data
@@ -142,17 +143,30 @@ def youtubeData(youtube : object) -> None:
         "playlist_title 3" : "playlist_id 3",
     }
     '''
+    with st.container(border=True):
+        chooseChannelorID = st.selectbox("Choose Channel or Channel ID",["Channel","Playlist"])
 
-    yt_channel_id = chooseChannel()
+    if chooseChannelorID == "Channel":
+        yt_channel_id = chooseChannel()
+        # Get all yt_channel_playlists for that channel
+        try:
+            yt_channel_playlists = get_all_playlists(youtube, yt_channel_id)
+        except:
+            st.error("No Playlists Found")
+            return
 
-    # Get all yt_channel_playlists for that channel
-    try:
-        yt_channel_playlists = get_all_playlists(youtube, yt_channel_id)
-    except:
-        st.error("No Playlists Found")
-        return
+        yt_chosen_playlistIDs = choosePlaylist(yt_channel_playlists)
 
-    yt_chosen_playlistIDs = choosePlaylist(yt_channel_playlists)
+    else:
+        yt_playlist_id = st.text_input('Enter Playlist ID', value='PLUU2G2-IFA11i5Y4P-1Uz3L4uCHFBbG1F')
+        st.caption(f"https://www.youtube.com/playlist?list={yt_playlist_id}",help = "You Can Click the Link to Verify the Playlist")
+
+        # Get playlist title
+        playlist_info = playlistInfo(youtube, yt_playlist_id)
+        yt_playlist_title = playlist_info.get('items', [{}])[0].get('snippet', {}).get('title', '')
+        yt_chosen_playlistIDs = {
+            yt_playlist_title: yt_playlist_id
+        }
 
     return yt_chosen_playlistIDs
 
