@@ -19,7 +19,7 @@ def chooseChannel() -> str:
     channel_id : str
         Channel ID of the channel
     '''
-    channel_id = st.text_input('Enter Channel ID', value='UCXKSbzihU5cu0U4qbbjB3GA')
+    channel_id = st.text_input('Enter Channel ID', value='UCXKSbzihU5cu0U4qbbjB3GA',help="You can get the Channel ID from the URL of the Channel")
     # channel_id = st.text_input('Enter Channel ID', value='UCEXnhgo3qEjrlkDvljtf5xg')
 
     # using regex to check if the channel ID is valid. it can either be UCPKlrgZXnnb89nSeITvTdGA format or https://www.youtube.com/channel/UCPKlrgZXnnb89nSeITvTdGA format
@@ -144,7 +144,7 @@ def youtubeData(youtube : object) -> None:
     }
     '''
     with st.container(border=True):
-        chooseChannelorID = st.selectbox("Choose Channel or Channel ID",["Channel","Playlist"])
+        chooseChannelorID = st.selectbox("Choose Channel or Channel ID",["Channel","Playlist"], help="Choose Channel to get all Playlists for a Channel or Choose Playlist to directly add a Playlist")
 
     if chooseChannelorID == "Channel":
         yt_channel_id = chooseChannel()
@@ -158,11 +158,26 @@ def youtubeData(youtube : object) -> None:
         yt_chosen_playlistIDs = choosePlaylist(yt_channel_playlists)
 
     else:
-        yt_playlist_id = st.text_input('Enter Playlist ID', value='PLUU2G2-IFA11i5Y4P-1Uz3L4uCHFBbG1F')
-        st.caption(f"https://www.youtube.com/playlist?list={yt_playlist_id}",help = "You Can Click the Link to Verify the Playlist")
+        yt_playlist_id = st.text_input('Enter Playlist ID', value='PLUU2G2-IFA11i5Y4P-1Uz3L4uCHFBbG1F',help="You can get the Playlist ID from the URL of the Playlist or directly add the URL")
 
-        # Get playlist title
-        playlist_info = playlistInfo(youtube, yt_playlist_id)
+        # Use regex to check if the playlist ID is valid and extract the playlist ID
+        if re.match(r'https://www.youtube.com/playlist\?list=(PL[A-Za-z0-9_-]{22})', yt_playlist_id):
+            yt_playlist_id = yt_playlist_id[38:]
+        elif re.match(r'PL[A-Za-z0-9_-]{22}', yt_playlist_id):
+            pass
+        else:
+            st.error("No Playlists Found")
+            return
+
+        try:
+            # Get playlist title
+            playlist_info = playlistInfo(youtube, yt_playlist_id)
+        except:
+            st.error("No Playlists Found")
+            return
+       
+        st.caption(f"https://www.youtube.com/playlist?list={yt_playlist_id}",help = "You Can Click the Link to Verify the Playlist")
+       
         yt_playlist_title = playlist_info.get('items', [{}])[0].get('snippet', {}).get('title', '')
         yt_chosen_playlistIDs = {
             yt_playlist_title: yt_playlist_id
