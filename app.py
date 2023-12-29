@@ -1,14 +1,12 @@
 '''
-Version: 1.6.1
-Date: 9-12-2023
+Version: 1.6.3
+Date: 29-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
 
 
 Updates:
-    - Added help texts
-    - Allow user to directly add a playlist using full URL
-    - Added Error Handling for Direct Playlist ID
+    - Added Missing Docs
 Future updates:
     - Deploy Website
 Current Issues:

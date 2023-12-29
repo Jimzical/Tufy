@@ -65,8 +65,7 @@ Choose between `Channel` or `Playlist`
 
 
 ## Updates
-- Changed some Default values
-- Added a Feature to Directly add Playlist instead of through Channels
+- Fixed Progress Bar
 
 ## Future Updates
 - Deploy Website
