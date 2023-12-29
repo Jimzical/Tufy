@@ -171,6 +171,8 @@ def SpotifyIntegration(youtube : object,sp : object, spc : object, yt_chosen_pla
                             # Update the list of songs to add to the playlist to only include songs after the last song in the playlist
                             yt_sp_songURIs[playlist_name] = yt_sp_songURIs[playlist_name][index+1:]
                     
+                    # Use sets to remove any duplicates
+                    yt_sp_songURIs[playlist_name] = list(set(yt_sp_songURIs[playlist_name])) 
 
                     # Add the rest of the songs in a loop
                     for i in range(0,len(yt_sp_songURIs[playlist_name]),100):

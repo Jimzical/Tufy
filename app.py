@@ -1,21 +1,17 @@
 '''
-Version: 1.4.2
+Version: 1.4.3
 Date: 9-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
 
 
 Updates:
-    - Removed Redundant Functions from YoutubeElements.py
-    - Commented out the use of Multithreading since it was causing too many issues
-    - Improved Search Error Handling
-    - Removing Redundant imports from app.py
+    - Used sets to remove any duplicates being added to spotify playlists
 Future updates:
     - Add a Checkbox right next to the multiselect to select all
     - Add a Counter to show progress
     - Deploy Website
 Current Issues:
-    - Use sets to remove any duplicates being added to spotify playlists
 '''
 import streamlit as st
 import components.HelperComponents as hc
