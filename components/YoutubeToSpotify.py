@@ -37,7 +37,8 @@ def Authentication() -> dict():
 
     return items
 
-@st.cache_resource()
+# Function to get all the playlists from a channel wihtout multithreading
+# @st.cache_resource()
 def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs : dict) -> dict():
     '''
     Get the Spotify URIs for songs in the _youtube playlists

@@ -135,13 +135,16 @@ def SpotifyIntegration(youtube : object,sp : object, spc : object, yt_chosen_pla
             # GETTING SPOTIFY URIs
             with st.status("Getting Spotify URIs", expanded=False) as status:
                 st.caption("This may take a while...")
-                yt_sp_songURIs = yts.get_youtube_to_spotify_song_ids(youtube, spc, yt_chosen_playlistIDs)
+                yt_sp_songURIs = yts.getYoutubeToSpotifySongIDs(youtube,spc,yt_chosen_playlistIDs)
+                # yt_sp_songURIs = yts.get_youtube_to_spotify_song_ids(youtube, spc, yt_chosen_playlistIDs)
                 st.write(yt_sp_songURIs)
                 status.update(label="Got all Info", state="complete", expanded=False)
-        except:
+        except Exception as e:
             st.error("Error in getting Spotify URIs")
+            # print(e)
             st.stop()
-        
+
+
         try:
             # ADDING SONGS TO PLAYLIST    
             with st.status("Adding Songs",expanded=True) as status:
