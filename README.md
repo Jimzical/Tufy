@@ -63,6 +63,7 @@ Choose between `Channel` or `Playlist`
             Your Playlist ID is `PL4o29bINVT4EG_y-k5jGoOu3-Am8Nvi10`
  -  Click the `Add Songs` Button
 
+
 ## Updates
 - Changed some Default values
 - Added a Feature to Directly add Playlist instead of through Channels
@@ -73,4 +74,5 @@ Choose between `Channel` or `Playlist`
 
 
 ## Contact
+Github: https://github.com/Jimzical
 Project Link: https://github.com/Jimzical/Tufy
