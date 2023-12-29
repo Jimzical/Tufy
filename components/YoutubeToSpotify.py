@@ -58,6 +58,21 @@ def getYoutubeToSpotifySongIDs(_youtube: object, _spc: object, yt_playlistIDs: d
     -------
     youtube_to_spotify_uri : dict
         The dictionary of playlist names and their IDs from _youtube
+    
+    Example
+    --------
+    >>> yt_playlistIDs = {
+        "playlist 1" : "id 1",
+        "playlist 2" : "id 2",
+        "playlist 3" : "id 3"
+    }
+    >>> youtube_to_spotify_uri = getYoutubeToSpotifySongIDs(_youtube,_spc,yt_playlistIDs)
+    
+    youtube_to_spotify_uri = {
+        "playlist 1" : ["URI 1","URI 2","URI 3"],
+        "playlist 2" : ["URI 4","URI 5","URI 6"],
+        "playlist 3" : ["URI 7","URI 8","URI 9"]
+    }
     '''
 
     youtube_to_spotifiy_uri = {} 

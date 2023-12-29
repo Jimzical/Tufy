@@ -1,12 +1,12 @@
 '''
-Version: 1.6.2
+Version: 1.6.3
 Date: 29-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
 
 
 Updates:
-    - Fixed Progress Bar
+    - Added Missing Docs
 Future updates:
     - Deploy Website
 Current Issues:
