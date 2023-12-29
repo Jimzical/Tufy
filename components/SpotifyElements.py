@@ -5,7 +5,6 @@ This file contains all the functions that are used to get the spotify streamlit 
 import streamlit as st
 from components.YoutubeHelper import *
 from components.SpotifyHelper import *
-from components.HelperComponents import Notif
 import components.YoutubeToSpotify as yts
 
 def getYoutubeToSpotifySongIDs(youtube : object,spc : object,yt_playlistIDs : dict) -> dict():
@@ -134,15 +133,18 @@ def SpotifyIntegration(youtube : object,sp : object, spc : object, yt_chosen_pla
 
         try:
             # GETTING SPOTIFY URIs
-            with st.status("Getting Spotify URIs", expanded=False) as status:
+            with st.status("Getting Spotify URIs", expanded=True) as status:
                 st.caption("This may take a while...")
-                yt_sp_songURIs = yts.get_youtube_to_spotify_song_ids(youtube, spc, yt_chosen_playlistIDs)
+                yt_sp_songURIs = yts.getYoutubeToSpotifySongIDs(youtube,spc,yt_chosen_playlistIDs)
+                # yt_sp_songURIs = yts.get_youtube_to_spotify_song_ids(youtube, spc, yt_chosen_playlistIDs)
                 st.write(yt_sp_songURIs)
                 status.update(label="Got all Info", state="complete", expanded=False)
-        except:
+        except Exception as e:
             st.error("Error in getting Spotify URIs")
+            print(e)
             st.stop()
-        
+
+
         try:
             # ADDING SONGS TO PLAYLIST    
             with st.status("Adding Songs",expanded=True) as status:
@@ -169,10 +171,15 @@ def SpotifyIntegration(youtube : object,sp : object, spc : object, yt_chosen_pla
                             # Update the list of songs to add to the playlist to only include songs after the last song in the playlist
                             yt_sp_songURIs[playlist_name] = yt_sp_songURIs[playlist_name][index+1:]
                     
-                    sp.playlist_add_items(
-                        playlist_id=sp_userPlaylist_to_uri_dict[playlist_name],
-                        items=yt_sp_songURIs[playlist_name]
-                    )                    
+                    # Use sets to remove any duplicates
+                    yt_sp_songURIs[playlist_name] = list(set(yt_sp_songURIs[playlist_name])) 
+
+                    # Add the rest of the songs in a loop
+                    for i in range(0,len(yt_sp_songURIs[playlist_name]),100):
+                        sp.playlist_add_items(
+                            playlist_id=sp_userPlaylist_to_uri_dict[playlist_name],
+                            items=yt_sp_songURIs[playlist_name][i:i+100]
+                        )
 
                 status.update(label="Added Songs", state="complete",expanded=True)
         except:

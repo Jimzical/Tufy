@@ -7,22 +7,19 @@ Future Updates:
 
 import streamlit as st
 from components.YoutubeHelper import *
-import re
-def throughChannelId(youtube : object) -> str:
-    '''
-    Create the Streamlit UI for entering the channel ID
+import re   
 
-    Parameters
-    ----------
-    youtube : object
-        Youtube API object
+# It was done this way when you could use the channel name to get the channel ID as well however since that functionality is no longer available, this function is redundant but i wont fix it yet
+def chooseChannel() -> str:
+    '''
+    Create the Streamlit text_input UI to get the channel ID
 
     Returns
     -------
     channel_id : str
         Channel ID of the channel
     '''
-    channel_id = st.text_input('Enter Channel ID', value='UCPKlrgZXnnb89nSeITvTdGA')
+    channel_id = st.text_input('Enter Channel ID', value='UCXKSbzihU5cu0U4qbbjB3GA',help="You can get the Channel ID from the URL of the Channel")
     # channel_id = st.text_input('Enter Channel ID', value='UCEXnhgo3qEjrlkDvljtf5xg')
 
     # using regex to check if the channel ID is valid. it can either be UCPKlrgZXnnb89nSeITvTdGA format or https://www.youtube.com/channel/UCPKlrgZXnnb89nSeITvTdGA format
@@ -38,54 +35,9 @@ def throughChannelId(youtube : object) -> str:
 
     else:
         raise ValueError("Invalid Channel ID")
-def throughChannelName(youtube : object):
-    '''
-    Create the Streamlit UI for entering the channel name
+    
 
-    Parameters
-    ----------
-    youtube : object
-        Youtube API object
-
-    Returns
-    -------
-    channel_id : str
-        Channel ID of the channel
-    '''
-    textbox, channelbutton = st.columns([4,1])
-
-    with textbox:
-        channel_name = st.text_input('Enter Channel Name')
-    with channelbutton:
-        st.write("")
-        st.write("")
-        channelbutton = st.button('Get Channel ID')
-    if channelbutton:
-        # Get channel ID
-        channel_id = get_channel_id(youtube, channel_name)
-        st.write("Channel ID:")
-        # make a link to the channel
-        st.markdown(f"https://www.youtube.com/channel/{channel_id}")
-        return channel_id
-
-def chooseChannel(youtube : object) -> str:
-    '''
-    Create the Streamlit UI to get the channel ID
-
-    Parameters
-    ----------
-    youtube : object
-        Youtube API object
-
-    Returns
-    -------
-    channel_id : str
-        Channel ID of the channel
-    '''
-    channel_id =throughChannelId(youtube)
-    return channel_id
-
-def choosePlaylist(playlists : list, testMode = False) -> dict:
+def choosePlaylist(playlists : list) -> dict:
     '''
     Create Streamlit UI to choose multiple playlist
 
@@ -103,7 +55,7 @@ def choosePlaylist(playlists : list, testMode = False) -> dict:
 
     Examples
     --------
-    >>> yt_playlistIDs = choosePlaylist(playlists, testMode = False)
+    >>> yt_playlistIDs = choosePlaylist(playlists)
     {
         "playlist_title 1" : "playlist_id 1",
         "playlist_title 2" : "playlist_id 2",
@@ -116,10 +68,7 @@ def choosePlaylist(playlists : list, testMode = False) -> dict:
         title_id_mapping[playlist['Title']] = playlist['ID']
 
     # Choosing the playlist
-    if testMode:
-        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=["Loop"])
-    else:
-        selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys())[-1])
+    selected_playlists = st.multiselect('Select Playlist', options=title_id_mapping.keys(), default=list(title_id_mapping.keys())[-1])
 
     playlistID_dict = {}
     # for all the selected playlists, get the playlist ID
@@ -169,43 +118,7 @@ def displayPlaylistItems(youtube : object, yt_chosen_playlistIDs : dict) -> None
                     col3.write(f"by  {i['snippet']['videoOwnerChannelTitle']}")
                 except:
                     col3.info("No Channel Name")
-# Was a test feature
-def toggleDisplayPlaylistItems(youtube : object, chosen_playlistIDs : dict) -> None:
-    '''
-    Create Streamlit UI to toggle the display of the playlist items
 
-    Parameters
-    ----------
-    youtube : object
-        Youtube API object
-    chosen_playlistIDs : dict
-        Dictionary of playlist ID and playlist title
-
-    Examples
-    --------
-    >>> yt_playlistIDs = {
-        "playlist 1" : "id 1",
-        "playlist 2" : "id 2",
-        "playlist 3" : "id 3"
-    }
-
-    >>> toggleDisplayPlaylistItems(youtube, yt_playlistIDs)
-    '''
-    toggle_youtube_display = st.toggle('Display Playlist Items')
-    
-    if toggle_youtube_display:
-        total_songs = 0
-    
-        for chosen_playlistname in chosen_playlistIDs.keys():
-            with st.status(f"Gettting Info for {chosen_playlistname}",expanded=True) as status:
-                st.subheader(f"Playlist: {chosen_playlistname}")
-                playlist_songs = returnPlaylistItems(youtube,chosen_playlistIDs[chosen_playlistname])
-                st.write(playlist_songs)
-                st.write(len(playlist_songs))
-                total_songs += len(playlist_songs)
-            status.update(label="Got all Info", state="complete",expanded=True)
-        st.title(f"`Total Number of Songs ➡️ {total_songs}`")
-    
 
 def youtubeData(youtube : object) -> None:
     '''
@@ -230,17 +143,45 @@ def youtubeData(youtube : object) -> None:
         "playlist_title 3" : "playlist_id 3",
     }
     '''
+    with st.container(border=True):
+        chooseChannelorID = st.selectbox("Choose Channel or Channel ID",["Channel","Playlist"], help="Choose Channel to get all Playlists for a Channel or Choose Playlist to directly add a Playlist")
 
-    yt_channel_id = chooseChannel(youtube)
+    if chooseChannelorID == "Channel":
+        yt_channel_id = chooseChannel()
+        # Get all yt_channel_playlists for that channel
+        try:
+            yt_channel_playlists = get_all_playlists(youtube, yt_channel_id)
+        except:
+            st.error("No Playlists Found")
+            return
 
-    # Get all yt_channel_playlists for that channel
-    try:
-        yt_channel_playlists = get_all_playlists(youtube, yt_channel_id)
-    except:
-        st.error("No Playlists Found")
-        return
+        yt_chosen_playlistIDs = choosePlaylist(yt_channel_playlists)
 
-    yt_chosen_playlistIDs = choosePlaylist(yt_channel_playlists, testMode=False)
+    else:
+        yt_playlist_id = st.text_input('Enter Playlist ID', value='PLUU2G2-IFA11i5Y4P-1Uz3L4uCHFBbG1F',help="You can get the Playlist ID from the URL of the Playlist or directly add the URL")
+
+        # Use regex to check if the playlist ID is valid and extract the playlist ID
+        if re.match(r'https://www.youtube.com/playlist\?list=(PL[A-Za-z0-9_-]{22})', yt_playlist_id):
+            yt_playlist_id = yt_playlist_id[38:]
+        elif re.match(r'PL[A-Za-z0-9_-]{22}', yt_playlist_id):
+            pass
+        else:
+            st.error("No Playlists Found")
+            return
+
+        try:
+            # Get playlist title
+            playlist_info = playlistInfo(youtube, yt_playlist_id)
+        except:
+            st.error("No Playlists Found")
+            return
+       
+        st.caption(f"https://www.youtube.com/playlist?list={yt_playlist_id}",help = "You Can Click the Link to Verify the Playlist")
+       
+        yt_playlist_title = playlist_info.get('items', [{}])[0].get('snippet', {}).get('title', '')
+        yt_chosen_playlistIDs = {
+            yt_playlist_title: yt_playlist_id
+        }
 
     return yt_chosen_playlistIDs
 

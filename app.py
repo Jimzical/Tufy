@@ -1,30 +1,26 @@
 '''
-Version: 1.4.0
+Version: 1.6.1
 Date: 9-12-2023
 
 Allows User to get all Playlists for a Channel given its Id or Name.
 
 
 Updates:
-    - Using MultiThreading to make track search faster
-    - Added Error Handling for adding songs to playlist
+    - Added help texts
+    - Allow user to directly add a playlist using full URL
+    - Added Error Handling for Direct Playlist ID
 Future updates:
     - Deploy Website
-    - Maybe upgrade the append-song feature to find the last common song intead of just checking the last song    
-
+Current Issues:
 '''
 import streamlit as st
-from streamlit import secrets
-from googleapiclient.discovery import build
 import components.HelperComponents as hc
-import components.YoutubeHelper as yh
 import components.YoutubeElements as ye
-import components.SpotifyHelper as sh
 import components.SpotifyElements as se
 import components.YoutubeToSpotify as yts
 
 def main(): 
-    hc.ColoredHeader('Youtube Channel Information',anchor=False)
+    hc.ColoredHeader('Youtube To Spotify Convertor',anchor=False)
 
     # ------------------------------ Authentication -------------------------
     
@@ -40,6 +36,7 @@ def main():
 
     # Youtube Display Stuff
     ye.youtubeDisplayElements(youtube, yt_chosen_playlistIDs)
+
 
     # ------------------------------ Spotify -------------------------------
     # Spotify Playlist IDs

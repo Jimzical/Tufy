@@ -1,6 +1,5 @@
 import streamlit as st
 import concurrent.futures
-from googleapiclient.discovery import build
 import components.YoutubeHelper as yh
 import components.SpotifyHelper as sh
 
@@ -38,8 +37,9 @@ def Authentication() -> dict():
 
     return items
 
-@st.cache_resource()
-def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs : dict) -> dict():
+# Function to get all the playlists from a channel wihtout multithreading
+# @st.cache_resource()
+def getYoutubeToSpotifySongIDs(_youtube: object, _spc: object, yt_playlistIDs: dict, streamlitMode=False) -> dict:
     '''
     Get the Spotify URIs for songs in the _youtube playlists
         
@@ -77,23 +77,67 @@ def getYoutubeToSpotifySongIDs(_youtube : object, _spc : object, yt_playlistIDs 
     youtube_to_spotifiy_uri = {} 
     # for each _youtube playlist 
     for playlist_name in yt_playlistIDs.keys():
-        playlist_songs = yh.returnPlaylistItems(_youtube,yt_playlistIDs[playlist_name])
+        playlist_songs = yh.returnPlaylistItems(_youtube, yt_playlistIDs[playlist_name])
 
-        # Initialising a list for each playlist
+        # Initializing a list for each playlist
         youtube_to_spotifiy_uri[playlist_name] = []
 
-        for song in playlist_songs:
+        progress_bar = st.progress(0)  # Create a progress bar
+
+        for i, song in enumerate(playlist_songs):
             # getting songID data for spotify
             song_data = sh.searchTrack(_spc, song)
 
-            # # appeding {name : id} to the list of songs to the list with the key as playlist name in this main dict 
-            # youtube_to_spotifiy_uri[playlist_name].append({song_data['track_name'] : song_data['track_id']})
+            if streamlitMode:
+                st.write(playlist_name)
+
+            # Append song_id to the list with the key as playlist name in this main dict 
             youtube_to_spotifiy_uri[playlist_name].append(song_data['track_id'])
 
-    return youtube_to_spotifiy_uri
+            # Update the progress bar
+            progress_percent = (i + 1) / len(playlist_songs)
+            progress_bar.progress(progress_percent)
 
+        # Show the final progress as 100%
+        progress_bar.progress(1.0)
+
+    # Print the resulting dictionary
+    st.write(youtube_to_spotifiy_uri) 
+    return youtube_to_spotifiy_uri
 # Function to get Spotify URIs for a playlist
 def get_playlist_uris(youtube, spc, playlist_name, playlist_id):
+    '''
+    Get the Spotify URIs for songs in the youtube playlists
+
+    Parameters
+    ----------
+    youtube : object
+        The youtube object from the Youtube API
+    spc : object
+        The spotify object from the Spotify API
+    playlist_name : str
+        Name of the playlist
+    playlist_id : str
+        ID of the playlist  
+
+    Returns
+    -------
+    playlist_name : str
+        Name of the playlist
+    uri_list : list
+        List of Spotify URIs for the songs in the playlist
+
+    Example
+    --------
+    >>> playlist_name, uri_list = get_playlist_uris(youtube, spc, playlist_name, playlist_id)
+
+    >>> playlist_name
+    'Playlist 1'
+
+    >>> uri_list
+    ['URI 1','URI 2','URI 3']
+
+    '''
     playlist_songs = yh.returnPlaylistItems(youtube, playlist_id)
     uri_list = []
 

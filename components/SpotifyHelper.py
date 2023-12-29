@@ -167,6 +167,8 @@ def searchTrack(sp : object, track_name : str, explicit : bool = False) -> list(
         Spotify API object
     track_name : str
         Name of the track
+    explicit : bool, optional
+        Return the full response, by default False
 
     Returns
     -------
@@ -184,7 +186,7 @@ def searchTrack(sp : object, track_name : str, explicit : bool = False) -> list(
          "track_album" : "Dynamite (DayTime Version)",
      }
     '''
-    track_list = sp.search(q=track_name, limit=10, offset=0, type='track', market=None)
+    track_list = sp.search(q=track_name, limit=1, offset=0, type='track', market=None)
     
     if explicit:
         return track_list
