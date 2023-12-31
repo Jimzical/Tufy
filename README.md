@@ -17,25 +17,10 @@ A Web Application to Convert Playlists from a YouTube Channel to Spotify Playlis
     ```sh
     pip install -r requirements.txt
     ```
-3. Create `.streamlit/secrets.toml`
-    ```sh
-    cd .streamlit
-    touch secrets.toml
-    ```
+3. Add the API keys to `secrets.toml`
+    > You can get your YouTube API Key from [here](https://console.developers.google.com/apis/credentials) and your Spotify Client ID and Secret from [here](https://developer.spotify.com/dashboard/applications).
 
-4. Add the following to `secrets.toml`
-    ```toml
-    [youtube]
-    api_key = "YOUTUBE API KEY"
-
-    [spotify]
-    client_id = "SPOTIFY CLIENT ID"
-    client_secret = "SPOTIFY CLIENT SECRET"
-    redirect_uri = "http://localhost:8501/"
-    ```
-    > You can get your YouTube API Key [here](https://console.developers.google.com/apis/credentials) and your Spotify Client ID and Secret [here](https://developer.spotify.com/dashboard/applications).
-
-5. Run the app
+4. Run the app
     ```sh
     streamlit run app.py
     ```
@@ -74,4 +59,5 @@ Choose between `Channel` or `Playlist`
 
 ## Contact
 Github: https://github.com/Jimzical
+</br>
 Project Link: https://github.com/Jimzical/Tufy
